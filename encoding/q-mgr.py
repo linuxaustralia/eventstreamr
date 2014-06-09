@@ -12,6 +12,7 @@ import string
 import glob
 import os
 import codecs
+from subprocess import call
 
 # Main Constants
 config_file = "file:///home/matt/eventstreamr/encoding/config.json"
@@ -25,7 +26,7 @@ schedule_ids = {}
 
 json_format="%Y-%m-%d %H:%M:%S"
 dv_format="%Y-%m-%d_%H-%M-%S"
-
+'''
 def display_menu(title, choices):
     body = [urwid.Text(title), urwid.Divider()]
     for c in choices:
@@ -33,6 +34,7 @@ def display_menu(title, choices):
         urwid.connect_signal(button, 'click', c['action'])
         body.append(urwid.AttrMap(button, None, focus_map='reversed'))
     return urwid.ListBox(urwid.SimpleFocusListWalker(body))
+'''
 
 def create_job(button):
     pass
@@ -96,14 +98,23 @@ for k in schedule_data.keys():
 			schedule = []
 			for time in dvs[room][date]:
 				if buf_start_time <= time <= buf_end_time:
-					schedule.append(time.strftime(dv_format) + ".dv")
+					schedule.append(root_path + "/" + room + "/" + date + "/" +  time.strftime(dv_format) + ".dv")
 			schedule_ids[z["schedule_id"]] = schedule
 		except KeyError:
 			print "file fail"
 
+
+print "Available Jobs"
 print schedule_ids
+print "Select a job: "
+selection = int(raw_input())
+call(["vlc"] + schedule_ids[selection])
+
+print "Select the files you bastard: "
+
+
 # go through the schedule looking at the directories 
-menu_title = 'AV Queue Manager'
+#menu_title = 'AV Queue Manager'
 
 menu = [
     { 
@@ -120,15 +131,15 @@ menu = [
     },
 ]
 
-
+'''
 main = urwid.Padding(display_menu(menu_title, menu), left=2, right=2)
-#create_job = urwid.Padding(display_menu(, menu), left=2, right=2)
+create_job = urwid.Padding(display_menu(cj_title, menu), left=2, right=2)
 top = urwid.Overlay(main, urwid.SolidFill(u'\N{MEDIUM SHADE}'),
     align='center', width=('relative', 60),
     valign='middle', height=('relative', 60),
     min_width=20, min_height=9)
 urwid.MainLoop(top, palette=[('reversed', 'standout', '')]).run()
-
+'''
 '''
 for room, a in schedule_data.items():
         schedule_data[room]
