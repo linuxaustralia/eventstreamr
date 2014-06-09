@@ -1,0 +1,38 @@
+:wq-mgr.py and q-run.py
+
+----
+eventstreamr - Get DV files and put them into the dv library
+----
+q-mgr.py - getschedule - create job with instructions on how to cut and encode (mlt,json files) --> /queue/todo/cut
+----
+q-run.py - Poll
+           Move the job to /queue/wip/<nodename>
+           Run the cut component of the job
+           Upload the result to the output Library
+           Move the job to /queue/done/cut
+----
+q-mgr.py - Read list of jobs in /queue/done/cut
+           Ask user to chose a job
+           Ask user to confirm Job should be encoded
+           Move job to /queue/todo/encode
+
+****
+Directory Structure
+
+base_dir is currently set to ~/eventstreamr/<event>
+<base_dir>/video/
+                /room/<room name>/<date>/%Y-%m-%d_%H:%M:%S.dv
+                /completed/<schedule_id>.dv,mp4,mp3,ogv,etc...
+<base_dir>/queue/todo/cut
+                     /encode
+                     /upload
+                /wip/<node>
+                /done/cut -ln ../../todo/encode
+                     /encode -ln ../../todo/upload
+                     /upload
+
+****
+
+2014-06-09_09:00:00.dv
+
+2014-06-09_10:20:00.dv

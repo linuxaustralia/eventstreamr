@@ -122,6 +122,7 @@ menu = [
 
 
 main = urwid.Padding(display_menu(menu_title, menu), left=2, right=2)
+#create_job = urwid.Padding(display_menu(, menu), left=2, right=2)
 top = urwid.Overlay(main, urwid.SolidFill(u'\N{MEDIUM SHADE}'),
     align='center', width=('relative', 60),
     valign='middle', height=('relative', 60),
