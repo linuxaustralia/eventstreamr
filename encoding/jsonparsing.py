@@ -62,6 +62,7 @@ for room in programmedata_final:
         rec_schedule[room_schedule['schedule_id']]['schedule_id'] = room_schedule['schedule_id']
         rec_schedule[room_schedule['schedule_id']]['start'] = room_schedule['start']
         rec_schedule[room_schedule['schedule_id']]['end'] = room_schedule['end']#!/usr/bin/env python
+print rec_schedule
 # -*- coding: utf-8 -*-
 
 import json
@@ -105,16 +106,16 @@ def mkdir_p(path):
 
 programmedata_json = urllib2.urlopen(config['schedule_location'])
 programmedata_final = json
-        rec_schedule[room_schedule['schedule_id']]['duration'] = room_schedule['duration']
-        rec_schedule[room_schedule['schedule_id']]['room'] = room
-        rec_schedule[room_schedule['schedule_id']]['title'] = room_schedule['title']
+rec_schedule[room_schedule['schedule_id']]['duration'] = room_schedule['duration']
+rec_schedule[room_schedule['schedule_id']]['room'] = room
+rec_schedule[room_schedule['schedule_id']]['title'] = room_schedule['title']
         #x = rec_schedule[room_schedule['schedule_id']]['path'] = storage_path + '/' + urlify(room) + rec_schedule[room_schedule['schedule_id']['start']
         #rec_schedule[room_schedule['schedule_id']]['path'] = storage_path + '/' + urlify(room) + re.split('\s+', rec_schedule[room_schedule['schedule_id']]['start'])
-        rec_schedule[room_schedule['schedule_id']]['files'] = ['test1.dv', 'test2.dv']
-        rec_schedule[room_schedule['schedule_id']]['distribution'] = ['yt', 'ftp']
-        rec_schedule[room_schedule['schedule_id']]['yt_encoding_profile'] = 1
-        rec_schedule[room_schedule['schedule_id']]['ftp_encoding_profile'] = 1 
-        print str(rec_schedule[room_schedule['schedule_id']]['schedule_id']) + ": " + str(rec_schedule[room_schedule['schedule_id']]['room']) + " " + str(rec_schedule[room_schedule['schedule_id']]['start'])
+rec_schedule[room_schedule['schedule_id']]['files'] = ['test1.dv', 'test2.dv']
+rec_schedule[room_schedule['schedule_id']]['distribution'] = ['yt', 'ftp']
+rec_schedule[room_schedule['schedule_id']]['yt_encoding_profile'] = 1
+rec_schedule[room_schedule['schedule_id']]['ftp_encoding_profile'] = 1 
+print str(rec_schedule[room_schedule['schedule_id']]['schedule_id']) + ": " + str(rec_schedule[room_schedule['schedule_id']]['room']) + " " + str(rec_schedule[room_schedule['schedule_id']]['start'])
 
 selected_schedule = raw_input('Enter Schedule ID: ')
 print selected_schedule

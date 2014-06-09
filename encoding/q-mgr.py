@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import urwid
 import urllib2
 import json
 from pprint import pprint
@@ -26,15 +25,7 @@ schedule_ids = {}
 
 json_format="%Y-%m-%d %H:%M:%S"
 dv_format="%Y-%m-%d_%H-%M-%S"
-'''
-def display_menu(title, choices):
-    body = [urwid.Text(title), urwid.Divider()]
-    for c in choices:
-        button = urwid.Button(c['title'])
-        urwid.connect_signal(button, 'click', c['action'])
-        body.append(urwid.AttrMap(button, None, focus_map='reversed'))
-    return urwid.ListBox(urwid.SimpleFocusListWalker(body))
-'''
+
 
 def create_job(button):
     pass
@@ -74,13 +65,6 @@ for room in os.listdir(root_path):
 	dvs[room] = dates
 #print dvs
 		
-'''for root, dirs, files in os.walk(config_data["base_dir"] + recording_dir):
-	# {'foyer': {'2014-06-09':[datetime, datetime...], '2014-06-10
-	print files
-'''	
-'''for filee in dirr:
-	print filee
-'''
 schedule_data = open_json(config_data["schedule"])
 for k in schedule_data.keys():
 	room = k.replace(" ", "")
@@ -98,7 +82,7 @@ for k in schedule_data.keys():
 			schedule = []
 			for time in dvs[room][date]:
 				if buf_start_time <= time <= buf_end_time:
-					schedule.append(root_path + "/" + room + "/" + date + "/" +  time.strftime(dv_format) + ".dv")
+					schedule.append(root_path + room + "/" + date + "/" +  time.strftime(dv_format) + ".dv")
 			schedule_ids[z["schedule_id"]] = schedule
 		except KeyError:
 			print "file fail"
@@ -111,35 +95,17 @@ selection = int(raw_input())
 call(["vlc"] + schedule_ids[selection])
 
 print "Select the files you bastard: "
+i = 0
+cut_list = {}
+for x in schedule_ids[selection]:
+	print "Do you want " + x + "? y/n"
+	if raw_input() == "y":
+		print "Do you want to trim the file? Please type in a value in secs say 10 from the start or -10 from the end "
+		cut_list[x] = raw_input()
+
+print cut_list
 
 
-# go through the schedule looking at the directories 
-#menu_title = 'AV Queue Manager'
-
-menu = [
-    { 
-        'title': 'Create New Job',
-        'action': create_job,
-    },
-    {
-        'title': 'Check Job',
-        'action': check_job,
-    },
-    {
-        'title': 'Exit',
-        'action': exit_program,
-    },
-]
-
-'''
-main = urwid.Padding(display_menu(menu_title, menu), left=2, right=2)
-create_job = urwid.Padding(display_menu(cj_title, menu), left=2, right=2)
-top = urwid.Overlay(main, urwid.SolidFill(u'\N{MEDIUM SHADE}'),
-    align='center', width=('relative', 60),
-    valign='middle', height=('relative', 60),
-    min_width=20, min_height=9)
-urwid.MainLoop(top, palette=[('reversed', 'standout', '')]).run()
-'''
 '''
 for room, a in schedule_data.items():
         schedule_data[room]
