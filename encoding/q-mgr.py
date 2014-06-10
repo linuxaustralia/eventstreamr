@@ -66,6 +66,7 @@ rec_schedule = {}
 		
 schedule_data = open_json(config_data["schedule"])
 for room in schedule_data:
+    room_tmp = room.replace(" ", "")
     for room_schedule in schedule_data[room]:
         rec_schedule[room_schedule['schedule_id']] = {}
         rec_schedule[room_schedule['schedule_id']]['presenters'] = room_schedule['presenters']
@@ -73,6 +74,7 @@ for room in schedule_data:
         rec_schedule[room_schedule['schedule_id']]['start'] = room_schedule['start']
         rec_schedule[room_schedule['schedule_id']]['end'] = room_schedule['end']
         rec_schedule[room_schedule['schedule_id']]['abstract'] = room_schedule['abstract']
+        rec_schedule[room_schedule['schedule_id']]['room'] = room_tmp
 print rec_schedule
 
 '''
