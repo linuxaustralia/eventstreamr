@@ -59,10 +59,11 @@ print re.split('\s+', s)
 for room in programmedata_final:
     for room_schedule in programmedata_final[room]:
         rec_schedule[room_schedule['schedule_id']] = {}
-#        rec_schedule[room_schedule['schedule_id']]['schedule_id'] = room_schedule['schedule_id']
+        rec_schedule[room_schedule['schedule_id']]['presenters'] = room_schedule['presenters']
+        rec_schedule[room_schedule['schedule_id']]['title'] = room_schedule['title']	
         rec_schedule[room_schedule['schedule_id']]['start'] = room_schedule['start']
         rec_schedule[room_schedule['schedule_id']]['end'] = room_schedule['end']
-	rec_schedule[room_schedule['schedule_id']]['title'] = room_schedule['title']
+	rec_schedule[room_schedule['schedule_id']]['abstract'] = room_schedule['abstract']
 print rec_schedule
 '''
 # -*- coding: utf-8 -*-

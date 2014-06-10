@@ -61,8 +61,21 @@ for room in os.listdir(root_path):
 		dates[date] = files
 	dvs[room] = dates
 #print dvs
+
+rec_schedule = {}
 		
 schedule_data = open_json(config_data["schedule"])
+for room in schedule_data:
+    for room_schedule in schedule_data[room]:
+        rec_schedule[room_schedule['schedule_id']] = {}
+        rec_schedule[room_schedule['schedule_id']]['presenters'] = room_schedule['presenters']
+        rec_schedule[room_schedule['schedule_id']]['title'] = room_schedule['title']
+        rec_schedule[room_schedule['schedule_id']]['start'] = room_schedule['start']
+        rec_schedule[room_schedule['schedule_id']]['end'] = room_schedule['end']
+        rec_schedule[room_schedule['schedule_id']]['abstract'] = room_schedule['abstract']
+print rec_schedule
+
+'''
 for k in schedule_data.keys():
 	room = k.replace(" ", "")
 	if room != k:
@@ -106,7 +119,7 @@ for x in schedule_ids[selection]:
 	schedule_ids[x] = {}
 	schedule_ids[x[schedule_id]
 print schedule_ids
-
+'''
 
 '''
 for room, a in schedule_data.items():
