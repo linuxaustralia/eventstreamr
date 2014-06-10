@@ -59,10 +59,12 @@ print re.split('\s+', s)
 for room in programmedata_final:
     for room_schedule in programmedata_final[room]:
         rec_schedule[room_schedule['schedule_id']] = {}
-        rec_schedule[room_schedule['schedule_id']]['schedule_id'] = room_schedule['schedule_id']
+#        rec_schedule[room_schedule['schedule_id']]['schedule_id'] = room_schedule['schedule_id']
         rec_schedule[room_schedule['schedule_id']]['start'] = room_schedule['start']
-        rec_schedule[room_schedule['schedule_id']]['end'] = room_schedule['end']#!/usr/bin/env python
+        rec_schedule[room_schedule['schedule_id']]['end'] = room_schedule['end']
+	rec_schedule[room_schedule['schedule_id']]['title'] = room_schedule['title']
 print rec_schedule
+'''
 # -*- coding: utf-8 -*-
 
 import json
@@ -118,4 +120,4 @@ rec_schedule[room_schedule['schedule_id']]['ftp_encoding_profile'] = 1
 print str(rec_schedule[room_schedule['schedule_id']]['schedule_id']) + ": " + str(rec_schedule[room_schedule['schedule_id']]['room']) + " " + str(rec_schedule[room_schedule['schedule_id']]['start'])
 
 selected_schedule = raw_input('Enter Schedule ID: ')
-print selected_schedule
+print selected_schedule'''

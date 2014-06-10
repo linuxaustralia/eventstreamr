@@ -33,9 +33,6 @@ def create_job(button):
 def check_job(button):
     pass
 
-def exit_program(button):
-    raise urwid.ExitMainLoop()
-
 def open_json(filename):
     json_data = urllib2.urlopen(filename)
     data = json.load(json_data)
@@ -100,10 +97,15 @@ cut_list = {}
 for x in schedule_ids[selection]:
 	print "Do you want " + x + "? y/n"
 	if raw_input() == "y":
-		print "Do you want to trim the file? Please type in a value in secs say 10 from the start or -10 from the end "
-		cut_list[x] = raw_input()
-
-print cut_list
+		print "Do you want to trim the file? y/n"
+		if raw_input() == "y":
+			print "Please type in a value in secs say 10 from the start or -10 from the end "
+			cut_list[x] = int(raw_input())
+		else:
+			cut_list[x] = 0
+	schedule_ids[x] = {}
+	schedule_ids[x[schedule_id]
+print schedule_ids
 
 
 '''
@@ -123,4 +125,4 @@ for room, a in schedule_data.items():
 schedule_ids.append(z['schedule_id']) 
 
 print rooms
-cnt schedule_data'''
+cnt schedulng China's Greenhouse Gas Emissions For Them   |  Rising Sea Levels Uncover Japanese War _data'''
