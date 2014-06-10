@@ -41,9 +41,9 @@ def open_json(filename):
 
 # get the config_data which includes the base_dir and the schedule variables
 config_data = open_json(config_file)
-print config_data["schedule"]
+#print config_data["schedule"]
 #get the schedule config_data[base_dir] interate over the room/dates/ to find the times that are with the start time of the schedule
-print config_data["base_dir"]
+#print config_data["base_dir"]
 dvs = {}
 files = []
 rooms = []
@@ -75,7 +75,9 @@ for room in schedule_data:
         rec_schedule[room_schedule['schedule_id']]['end'] = room_schedule['end']
         rec_schedule[room_schedule['schedule_id']]['abstract'] = room_schedule['abstract']
         rec_schedule[room_schedule['schedule_id']]['room'] = room_tmp
-print rec_schedule
+date, time = rec_schedule[1]['start'].split()
+print config_data['base_dir'] + rec_schedule[1]['room'] + '/' + date + "/" 
+
 
 '''
 for k in schedule_data.keys():
