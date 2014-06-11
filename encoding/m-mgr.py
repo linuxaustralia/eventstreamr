@@ -81,7 +81,6 @@ for room in os.listdir(recording_root):
     # read the schedule file, removing spaces in room names
     raw = open_json(schedule_file)
     schedule_data = {k.replace(" ", ""):v for k,v in raw.items()}
-    print schedule_data
     # match items in the schedule with .dv files by timestamp
     buffer = datetime.timedelta(minutes=10)
     fields = ["presenters", "title", "start", "end"]
@@ -132,6 +131,7 @@ def get_duration(filename):
 #          'filename' : time.strftime(dv_format) + ".dv",
 #          'filepath' : "/".join([recording_root, room, date])
 DEVNULL = open(os.devnull, 'wb')
+
 print "Available jobs:", [t for t,v in talks.items() if v["playlist"]]
 n = prompt_for_number("Select a job")
 
@@ -164,16 +164,27 @@ while n:
     print
     print "Starting job"
     # this basically prints the cut list which will be used later
-    print "The files I want to keep are: " 
-    talk["cut_list"] = talk["playlist"][start_file:end_file+1]
-    talk["cut_list"][0]["in"] = start_offset
-    talk["cut_list"][-1]["out"] = end_offset
+    talks[n]["cut_list"] = talk["playlist"][start_file:end_file+1]
+    talks[n]["cut_list"][0]["in"] = start_offset
+    talks[n]["cut_list"][-1]["out"] = end_offset
 
     # Now onto the xml stuff. Very rough and ready but will clean up when it works. Need sleep will fix it up tomorrow/today ;-)
-    tmpmlt = open(talk['schedule_id'], 'rw')
-
+    #tmpmlt = open(talk["schedule_id"], 'rw')
+    print talks[n]["cut_list"]
     mlt = Element('mlt')
+    resources = []
+    producers = []
+    print
+    print "----------"
+    print "Available jobs:", [t for t,v in talks.items() if v["playlist"]]
+    n = prompt_for_number("Select a job")
 
+#    for i,resources in enumerate(talk["cut_list"]):
+#        print i, resources
+
+'''
+        producer[i] = SubElement(mlt, 'producer', id=resource["filename"])
+        
     intro = SubElement(mlt, 'producer', id='intro')
     intro_property = SubElement(intro, "property", name="resource")
     intro_property.text = "intro.dv"
@@ -188,8 +199,23 @@ while n:
 
     tmpmlt.write(prettify(mlt));
     intro.close()
-
 '''
+'''
+
+<?xml version="1.0" ?>
+<mlt>
+  <producer id="intro">
+    <property name="resource">intro.dv</property>
+  </producer>
+  <producer id="title">
+    <property name="resource"/>
+  </producer>
+  <playlist id="playlist0">
+    <entry in="0" out="75" producer="intro"/>
+    <entry in="75" out="1000000" producer="title"/>
+  </playlist>
+</mlt>
+
 for i,dvfile in enumerate(dvfiles):
 if start_file <= i <= end_file:
        extra = ""
