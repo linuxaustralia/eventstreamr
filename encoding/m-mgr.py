@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from xml.etree.ElementTree import Element, SubElement, Comment, tostring
+from xml.etree import ElementTree
+from xml.dom import minidom
+
 import urllib2
 import json
 import datetime
@@ -18,6 +22,12 @@ schedule_ids = {}
 json_format="%Y-%m-%d %H:%M:%S"
 dv_format="%Y-%m-%d_%H-%M-%S"
 
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    rough_string = ElementTree.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")
 
 def open_json(filename):
     if "://" in filename:
@@ -158,7 +168,26 @@ while n:
     talk["cut_list"] = talk["playlist"][start_file:end_file+1]
     talk["cut_list"][0]["in"] = start_offset
     talk["cut_list"][-1]["out"] = end_offset
+
+    # Now onto the xml stuff. Very rough and ready but will clean up when it works. Need sleep will fix it up tomorrow/today ;-)
     tmpmlt = open(talk['schedule_id'], 'rw')
+
+    mlt = Element('mlt')
+
+    intro = SubElement(mlt, 'producer', id='intro')
+    intro_property = SubElement(intro, "property", name="resource")
+    intro_property.text = "intro.dv"
+    title = SubElement(mlt, "producer", id="title")
+    title_property = SubElement(title, 'property', name="resource")
+    title_property = "title.png"
+    play_intro = SubElement(mlt, "playlist", id="playlist0")
+    producer0 = SubElement(play_intro, "entry producer=\"intro\" in=\"0\" out=\"75\""   )
+    producer1 = SubElement(play_intro, "entry producer=\"title\" in=\"75\" out=\"1000000\"")
+
+    print prettify(mlt)
+
+    tmpmlt.write(prettify(mlt));
+    intro.close()
 
 '''
 for i,dvfile in enumerate(dvfiles):
