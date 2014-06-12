@@ -13,6 +13,9 @@ import datetime
 import os
 import subprocess
 
+from lib.schedule import *
+from lib.ui import *
+
 # Main Constants
 config_file = "config.json"
 recording_dir = 'recording'
@@ -24,45 +27,9 @@ schedule_ids = {}
 json_format="%Y-%m-%d %H:%M:%S"
 dv_format="%Y-%m-%d_%H-%M-%S"
 
-def prettify(elem):
-    """Return a pretty-printed XML string for the Element.
-    """
-    rough_string = ElementTree.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ")
 
-def open_json(filename):
-    if "://" in filename:
-        json_data = urllib2.urlopen(filename)
-    else:
-        json_data = open(filename)
-    data = json.load(json_data)
-    json_data.close()
-    return data
-
-def dv_to_datetime(filename):
-    """ Return a datetime object if filename is <timestamp>.dv, else None """
-    if filename[-3:] == ".dv":
-        try:
-            time = datetime.datetime.strptime(filename[:-3], dv_format)
-        except ValueError:
-            time = None
-    else:
-        time = None
-    return time
-
-def potential_files(dv_list, start, end, buffer):
-    """ Return a list of times that are roughly within start & end times """
-    files = []
-    for time in dv_list:
-        if start-buffer <= time <= end+buffer:
-            dv_file = {
-                'filename' : time.strftime(dv_format) + ".dv",
-                'filepath' : "/".join([recording_root, room, date])
-            }
-            files.append(dv_file)
-    return sorted(files)
-
+# match items in the schedule with .dv files by timestamp
+buffer = datetime.timedelta(minutes=10)
 
 # read the config file
 config_data = open_json(config_file)
@@ -71,55 +38,15 @@ schedule_file = base_dir + "/" + config_data["schedule"]
  
 # first pass through the recording directory: find the times of all .dv files
 recording_root = base_dir + "/" + recording_dir
-dvs = {}
-for room in os.listdir(recording_root):
-    dates = {}
-    room_path = recording_root + "/" + room
-    for date in os.listdir(room_path):
-        date_path = room_path + "/" + date
-    dates[date] = [dv_to_datetime(f) for f in os.listdir(date_path)]
-    dvs[room] = dates
-
-    # read the schedule file, removing spaces in room names
-    raw = open_json(schedule_file)
-    schedule_data = {k.replace(" ", ""):v for k,v in raw.items()}
-    # match items in the schedule with .dv files by timestamp
-    buffer = datetime.timedelta(minutes=10)
-    fields = ["schedule_id", "presenters", "title", "start", "end"]
-    talks = {}
-    for room in schedule_data:
-        for talk in schedule_data[room]:
-            id = talk["schedule_id"]
-            talks[id] = {k:talk[k] for k in fields}
-            start = datetime.datetime.strptime(talk["start"], json_format)
-            end = datetime.datetime.strptime(talk["end"], json_format)
-            date = start.strftime("%Y-%m-%d")
-            try: 
-                playlist = potential_files(dvs[room][date], start, end, buffer)
-            except KeyError:
-                playlist = []
-            talks[id]["playlist"] = playlist
+talks = get_schedule(schedule_file, json_format)
+for talk in talks:
+    link_dv_files(talk, recording_root, buffer, dv_format)
 
 """
 User interface stuff
 """
 
 
-
-def prompt(string, default=None):
-    """ Return user input, or default value if they just press enter """
-    if default is not None:
-        return raw_input("{0} [{1}]: ".format(string, default)) or default
-    else:
-        return raw_input("{0}: ".format(string))
-
-def prompt_for_number(string, default=None):
-    """ Return user input as an int if possible, else None """
-    response = prompt(string, default)
-    try:
-        return int(response)
-    except ValueError:
-        return None
 
 def get_duration(filename):
 # from matt, untested since i don't have test files
@@ -134,18 +61,16 @@ def get_duration(filename):
 #          'filepath' : "/".join([recording_root, room, date])
 DEVNULL = open(os.devnull, 'wb')
 
-print "Available jobs:", [t for t,v in talks.items() if v["playlist"]]
+jobs = { t['schedule_id']: t for t in talks if t["playlist"] }
+
+print "Available jobs:", [t for t,v in jobs.items() if v["playlist"]]
 n = prompt_for_number("Select a job")
 
 while n: 
-    talk = talks[n]
+    talk = jobs[n]
     
     dvfiles = [z["filepath"] + "/" + z["filename"] for z in talk["playlist"]]
-    try:
-        subprocess.Popen(["vlc"] + dvfiles, stderr=DEVNULL)
-    except KeyError:
-        n = prompt_for_number("Select a job")
-        continue
+    subprocess.Popen(["vlc"] + dvfiles, stderr=DEVNULL)
 
     print
     print "Title:", talk["title"]
@@ -158,25 +83,24 @@ while n:
     print
     # our users always type sensible things...right
     start_file = prompt_for_number("Start file", 0)
-    start_offset = prompt_for_number("Start time offset seconds", 0)
+    start_offset = prompt_for_time("Start time offset (HH:MM:SS)", 0)
     end_file = prompt_for_number("End file", len(talk["playlist"])-1)
-    end_offset = prompt_for_number("End time offset seconds", 0)
+    end_offset = prompt_for_time("End time offset seconds (HH:MM:SS)", 0)
     # should probably be the end of the selected end_file using exiftool
 
     print
     print "Starting job"
     # this basically prints the cut list which will be used later
     talk["cut_list"] = talk["playlist"][start_file:end_file+1]
-    talk["cut_list"][0]["in"] = start_offset
+    print start_offset
+    print end_offset
+    talk["cut_list"][0]["in"] = int(start_offset.strftime("%s")) * 25
     talk["cut_list"][-1]["out"] = end_offset
-
-    print talk["cut_list"] 
 
 #= start_offset
     talk["cut_list"][-1]["out"] = end_offset
 
     # Now onto the xml stuff. Very rough and ready but will clean up when it works. Need sleep will fix it up tomorrow/today ;-)
-    print talk
     tmpmlt = open(str(talk['schedule_id']) + ".mlt", 'w')
     mlt = Element('mlt')
     playlist = SubElement(mlt, "playlist", id="playlist0")
@@ -203,11 +127,11 @@ while n:
     image.save(filename=str(talk['schedule_id']) + ".png")
 
 
-    print prettify(mlt)
+    ElementTree.ElementTree(mlt).write(str(talk['schedule_id']) + ".mlt")
 
     print
     print "----------"
-    print "Available jobs:", [t for t,v in talks.items() if v["playlist"]]
+    print "Available jobs:", [t for t,v in jobs.items() if v["playlist"]]
     n = prompt_for_number("Select a job")
 
 
