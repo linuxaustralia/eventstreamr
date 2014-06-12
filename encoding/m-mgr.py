@@ -4,6 +4,8 @@
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from xml.etree import ElementTree
 from xml.dom import minidom
+from wand.drawing import Drawing
+from wand.image import Image
 
 import urllib2
 import json
@@ -83,7 +85,7 @@ for room in os.listdir(recording_root):
     schedule_data = {k.replace(" ", ""):v for k,v in raw.items()}
     # match items in the schedule with .dv files by timestamp
     buffer = datetime.timedelta(minutes=10)
-    fields = ["presenters", "title", "start", "end"]
+    fields = ["schedule_id", "presenters", "title", "start", "end"]
     talks = {}
     for room in schedule_data:
         for talk in schedule_data[room]:
@@ -137,7 +139,7 @@ n = prompt_for_number("Select a job")
 
 while n: 
     talk = talks[n]
-
+    
     dvfiles = [z["filepath"] + "/" + z["filename"] for z in talk["playlist"]]
     try:
         subprocess.Popen(["vlc"] + dvfiles, stderr=DEVNULL)
@@ -164,26 +166,72 @@ while n:
     print
     print "Starting job"
     # this basically prints the cut list which will be used later
-    talks[n]["cut_list"] = talk["playlist"][start_file:end_file+1]
-    talks[n]["cut_list"][0]["in"] = start_offset
-    talks[n]["cut_list"][-1]["out"] = end_offset
+    talk["cut_list"] = talk["playlist"][start_file:end_file+1]
+    talk["cut_list"][0]["in"] = start_offset
+    talk["cut_list"][-1]["out"] = end_offset
+
+    print talk["cut_list"] 
+
+#= start_offset
+    talk["cut_list"][-1]["out"] = end_offset
 
     # Now onto the xml stuff. Very rough and ready but will clean up when it works. Need sleep will fix it up tomorrow/today ;-)
-    #tmpmlt = open(talk["schedule_id"], 'rw')
-    print talks[n]["cut_list"]
+    print talk
+    tmpmlt = open(str(talk['schedule_id']) + ".mlt", 'w')
     mlt = Element('mlt')
-    resources = []
-    producers = []
+    playlist = SubElement(mlt, "playlist", id="playlist0")
+    for cut_file in talk["cut_list"]:
+        producer = SubElement(mlt, 'producer', id=cut_file["filename"])
+        producer_property = SubElement(producer, "property", name="resource")
+        producer_property.text = cut_file["filepath"] + "/"  + cut_file["filename"]
+        args = {} 
+        args['producer'] = cut_file['filename']
+        if 'in' in cut_file:
+            args['in'] = str(cut_file['in'])
+        if 'out' in cut_file:
+            args['out'] = str(cut_file['out'])
+        playlist_entry = SubElement(playlist, "entry", args)
+
+
+    image = Image(width=700, height=200)
+    label = Drawing()
+    label.font = '/usr/share/fonts/truetype/ubuntu-font-family/ubuntu-b.ttf'
+    label.text_alignment = 'center'
+    label.text(350, 100, talk['title']);
+    label(image)
+    image.format = 'png'
+    image.save(filename=str(talk['schedule_id']) + ".png")
+
+
+    print prettify(mlt)
+
     print
     print "----------"
     print "Available jobs:", [t for t,v in talks.items() if v["playlist"]]
     n = prompt_for_number("Select a job")
 
-#    for i,resources in enumerate(talk["cut_list"]):
-#        print i, resources
 
 '''
-        producer[i] = SubElement(mlt, 'producer', id=resource["filename"])
+mi] = start_offset
+       #talksi] = start_offset
+       #talks[n]["files"][i]["out"] = end_offset
+[n]["files"][i]["out"] = end_offset
+lt = Element('mlt')
+
+intro = SubElement(mlt, 'producer', id='intro')
+    irint prettify(mlt)
+intro_property = SubElement(intro, "property", name="resource")
+intro_property.text = "intro.dv"
+title = SubElement(mlt, "producer", id="title")
+title_property = SubElement(title, 'property', name="resource")
+title_property = "title.png"
+play_intro = SubElement(mlt, "playlist", id="playlist0")
+producer0 = SubElement(play_intro, "entry producer=\"intro\" in=\"0\" out=\"75\""   )
+producer1 = SubElement(play_intro, "entry producer=\"title\" in=\"75\" out=\"1000000\"")
+'''
+
+
+'''
         
     intro = SubElement(mlt, 'producer', id='intro')
     intro_property = SubElement(intro, "property", name="resource")
@@ -217,6 +265,7 @@ while n:
 </mlt>
 
 for i,dvfile in enumerate(dvfiles):
+    irint prettify(mlt)
 if start_file <= i <= end_file:
        extra = ""
        if i == start_file:
@@ -224,8 +273,9 @@ if start_file <= i <= end_file:
        if i == end_file:
           extra = "(end: {0} seconds)".format(end_offset)
        print dvfile, extra
-       #talks[n]["files"][i]["in"] = start_offset
-       #talks[n]["files"][i]["out"] = end_offset
+       #talks[n]["files"][i]["in:", [t for t,v in talks.items() if v["playlist"]]
+    n = prompt_for_number("Select a job")
+
        print talks[n]["files"][i]
     else:
         print talks[n]["files"].remove(i)
