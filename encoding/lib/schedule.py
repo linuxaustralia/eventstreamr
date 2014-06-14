@@ -51,3 +51,4 @@ def link_dv_files(talk, recording_root, dv_match_window, dv_format):
                     'filepath' : talk_path
                 }
                 talk['playlist'].append(dv_file)
+                talk['playlist'].sort()
