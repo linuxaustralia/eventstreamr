@@ -10,7 +10,7 @@ import subprocess
 from lib.schedule import *
 from lib.ui import *
 from lib.duration import *
-from lib.mlt import *
+from lib.job import *
 
 # Main Constants
 config_file = "config.json"
@@ -72,6 +72,7 @@ while n:
     talk["cut_list"][-1]["out"] = end_offset
 
     create_mlt(talk, queue_todo_dir + "/" + str(talk['schedule_id']) + ".mlt")
+    create_title(talk, queue_todo_dir + "/" + str(talk['schedule_id']) + ".png")
 
     print
     print "----------"
