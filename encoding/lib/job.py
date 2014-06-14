@@ -5,7 +5,6 @@ from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-
 def create_mlt(talk, output_file):
     mlt = Element('mlt')
     playlist = SubElement(mlt, "playlist", id="playlist0")
