@@ -45,7 +45,7 @@ n = prompt_for_number("Select a job")
 while n: 
     talk = jobs[n]
 
-    dv_files = [os.path.join(dv_file['filepath'], dv_file['filename'] for dv_file in talk['playlist']]
+    dv_files = [os.path.join(dv_file['filepath'], dv_file['filename']) for dv_file in talk['playlist']]
 
     with open(os.devnull, 'wb') as DEVNULL:
         subprocess.Popen(['vlc'] + dv_files, stderr=DEVNULL)
@@ -66,7 +66,7 @@ while n:
 
     print
     # this basically prints the cut list which will be used later
-    talk['cut_list' = talk['playlist'][start_file:end_file+1]
+    talk['cut_list'] = talk['playlist'][start_file:end_file+1]
     talk['cut_list'][0]['in'] = start_offset
     talk['cut_list'][-1]['out'] = end_offset
 
