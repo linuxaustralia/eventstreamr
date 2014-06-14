@@ -3,7 +3,7 @@ from duration import str2delta
 def prompt(string, default=None):
     """ Return user input, or default value if they just press enter """
     if default is not None:
-        return raw_input("{0} [{1}]: ".format(string, default)) or default
+        return raw_input("{0} [{1}]: ".format(string, default)) or str(default)
     else:
         return raw_input("{0}: ".format(string))
 
