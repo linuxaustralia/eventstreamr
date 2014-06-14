@@ -1,4 +1,4 @@
 {
-    "base_dir": "test", 
+    "base_dir": "/home/matt/pyconau/", 
     "schedule": "lwn-test.json"
 }
