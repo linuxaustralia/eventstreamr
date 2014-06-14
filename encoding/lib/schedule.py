@@ -39,13 +39,13 @@ def get_schedule(schedule_file, json_format):
             talks.append(talk)
     return talks
 
-def link_dv_files(talk, recording_root, buffer, dv_format):
+def link_dv_files(talk, recording_root, dv_match_window, dv_format):
     talk['playlist'] = [] 
     talk_path = recording_root + "/" + talk['room'] + "/" + talk['date']
     if os.path.exists(talk_path):
         for filename in os.listdir(talk_path):
             time = dv_to_datetime(filename, dv_format) 
-            if time and talk['start'] - buffer <= time <= talk['end'] + buffer:
+            if time and talk['start'] - dv_match_window <= time <= talk['end'] + dv_match_window:
                 dv_file = {
                     'filename' : filename,
                     'filepath' : talk_path
