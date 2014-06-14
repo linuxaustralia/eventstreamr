@@ -4,8 +4,6 @@
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from xml.etree import ElementTree
 from xml.dom import minidom
-from wand.drawing import Drawing
-from wand.image import Image
 
 import urllib2
 import json
