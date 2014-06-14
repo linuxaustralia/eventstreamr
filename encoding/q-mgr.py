@@ -60,15 +60,21 @@ while n:
     print
     # our users always type sensible things...right
     start_file = prompt_for_number("Start file", 0)
-    start_offset = prompt_for_time("Start time offset", 0)
+    start_offset = None
+    while start_offset is None:
+        start_offset = prompt_for_time("Start time offset", 0)
     end_file = prompt_for_number("End file", len(talk['playlist'])-1)
-    end_offset = prompt_for_time("End time offset")
+    end_offset = None
+    while end_offset is None:
+        end_offset = prompt_for_time("End time offset")
 
     print
     # this basically prints the cut list which will be used later
     talk['cut_list'] = talk['playlist'][start_file:end_file+1]
+    print talk['cut_list']
     talk['cut_list'][0]['in'] = start_offset
     talk['cut_list'][-1]['out'] = end_offset
+    print talk['cut_list']
 
 
     print "Creating and queuing job " + str(talk['schedule_id'])
