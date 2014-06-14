@@ -13,6 +13,7 @@ import subprocess
 
 from lib.schedule import *
 from lib.ui import *
+from lib.duration import *
 
 # Main Constants
 config_file = "config.json"
@@ -40,23 +41,7 @@ talks = get_schedule(schedule_file, json_format)
 for talk in talks:
     link_dv_files(talk, recording_root, buffer, dv_format)
 
-"""
-User interface stuff
-"""
 
-
-
-def get_duration(filename):
-# from matt, untested since i don't have test files
-# not quite sure what this returns/outputs
-    cmd = "exiftool -duration " + filename
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    for line in p.stdout:
-        print line.split()[2]
-        return
-
-#          'filename' : time.strftime(dv_format) + ".dv",
-#          'filepath' : "/".join([recording_root, room, date])
 DEVNULL = open(os.devnull, 'wb')
 
 jobs = { t['schedule_id']: t for t in talks if t["playlist"] }
@@ -81,21 +66,15 @@ while n:
     print
     # our users always type sensible things...right
     start_file = prompt_for_number("Start file", 0)
-    start_offset = prompt_for_time("Start time offset (HH:MM:SS)", 0)
+    start_offset = prompt_for_time("Start time offset", 0)
     end_file = prompt_for_number("End file", len(talk["playlist"])-1)
-    end_offset = prompt_for_time("End time offset seconds (HH:MM:SS)", 0)
-    # should probably be the end of the selected end_file using exiftool
+    end_offset = prompt_for_time("End time offset")
 
     print
     print "Starting job"
     # this basically prints the cut list which will be used later
     talk["cut_list"] = talk["playlist"][start_file:end_file+1]
-    print start_offset
-    print end_offset
-    talk["cut_list"][0]["in"] = int(start_offset.strftime("%s")) * 25
-    talk["cut_list"][-1]["out"] = end_offset
-
-#= start_offset
+    talk["cut_list"][0]["in"] = start_offset
     talk["cut_list"][-1]["out"] = end_offset
 
     # Now onto the xml stuff. Very rough and ready but will clean up when it works. Need sleep will fix it up tomorrow/today ;-)
@@ -108,14 +87,16 @@ while n:
         producer_property.text = cut_file["filepath"] + "/"  + cut_file["filename"]
         args = {} 
         args['producer'] = cut_file['filename']
-        print duration(producer_property.text)
-        if 'in' in cut_file:
-            args['in'] = str(cut_file['in'])
-        if 'out' in cut_file:
-            args['out'] = str(cut_file['out'])
+        #print get_duration(producer_property.text)
+	if 'in' in cut_file and cut_file['in']:
+	    args['in'] = str(cut_file['in'].total_seconds())
+	if 'out' in cut_file and cut_file['out']:
+	    args['out'] = str(cut_file['out'].total_seconds())
         playlist_entry = SubElement(playlist, "entry", args)
 
 
+
+    """
     image = Image(width=700, height=200)
     label = Drawing()
     label.font = '/usr/share/fonts/truetype/ubuntu-font-family/ubuntu-b.ttf'
@@ -124,6 +105,7 @@ while n:
     label(image)
     image.format = 'png'
     image.save(filename=str(talk['schedule_id']) + ".png")
+    """
 
 
     ElementTree.ElementTree(mlt).write(str(talk['schedule_id']) + ".mlt")
