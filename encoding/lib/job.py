@@ -1,6 +1,10 @@
+import os
+import subprocess
+
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from xml.etree import ElementTree
 from xml.dom import minidom
+
 
 def create_mlt(talk, output_file):
     mlt = Element('mlt')
@@ -17,3 +21,7 @@ def create_mlt(talk, output_file):
             args['out'] = str(int(cut_file['out'].total_seconds()) * 25)
         playlist_entry = SubElement(playlist, "entry", args)
     ElementTree.ElementTree(mlt).write(output_file)
+
+def create_title(talk, output_file):
+    with open(os.devnull, 'wb') as DEVNULL:
+        subprocess.Popen(["./gen_image.pl", output_file, talk["title"] + "\n" + talk["presenters"]], stderr=DEVNULL)
