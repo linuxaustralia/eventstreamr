@@ -33,15 +33,15 @@ def get_schedule(schedule_file, json_format):
         for schedule_talk in schedule_room_data:
             talk = {field: schedule_talk[field] for field in fields}
             talk['room'] = schedule_room
-            talk['start'] = datetime.datetime.strptime(schedule_talk["start"], json_format)
-            talk['end'] = datetime.datetime.strptime(schedule_talk["end"], json_format)
+            talk['start'] = datetime.datetime.strptime(schedule_talk['start'], json_format)
+            talk['end'] = datetime.datetime.strptime(schedule_talk['end'], json_format)
             talk['date'] = talk['start'].strftime("%Y-%m-%d")
             talks.append(talk)
     return talks
 
 def link_dv_files(talk, recording_root, dv_match_window, dv_format):
     talk['playlist'] = [] 
-    talk_path = recording_root + "/" + talk['room'] + "/" + talk['date']
+    talk_path = os.path.join(recording_root, talk['room'], talk['date'])
     if os.path.exists(talk_path):
         for filename in os.listdir(talk_path):
             time = dv_to_datetime(filename, dv_format) 

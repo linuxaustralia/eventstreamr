@@ -22,4 +22,3 @@ def prompt_for_time(string, default=None):
         return str2delta(response)
     except ValueError:
         return None
-
