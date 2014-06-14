@@ -22,7 +22,7 @@ completed_dir = os.path.join(base_dir, 'completed')
 def move_job(src_dir, dst_dir, jobname):
     files = os.listdir(src_dir)
     for filename in files:
-        if fnmatch.fnmatch(filename, job + '.*'):
+        if fnmatch.fnmatch(filename, jobname + '.*'):
             src = os.path.join(src_dir, filename)
             dst = os.path.join(dst_dir, filename)
             if not os.path.exists(dst_dir):
@@ -45,7 +45,7 @@ while True:
             log_file = os.path.join(queue_wip_dir, job + '.log')
             with open(log_file, 'w') as log:
                 for args in pipeline:
-                    process = subprocess.Popen(args, stdout=subprocess.PIPE)
+                    process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     (stdoutdata, stderrdata) = process.communicate()
                     if stdoutdata:
                         log.write(stdoutdata)
