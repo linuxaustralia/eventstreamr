@@ -110,6 +110,7 @@ while n:
         producer_property.text = cut_file["filepath"] + "/"  + cut_file["filename"]
         args = {} 
         args['producer'] = cut_file['filename']
+        print duration(producer_property.text)
         if 'in' in cut_file:
             args['in'] = str(cut_file['in'])
         if 'out' in cut_file:
@@ -135,92 +136,4 @@ while n:
     n = prompt_for_number("Select a job")
 
 
-'''
-mi] = start_offset
-       #talksi] = start_offset
-       #talks[n]["files"][i]["out"] = end_offset
-[n]["files"][i]["out"] = end_offset
-lt = Element('mlt')
 
-intro = SubElement(mlt, 'producer', id='intro')
-    irint prettify(mlt)
-intro_property = SubElement(intro, "property", name="resource")
-intro_property.text = "intro.dv"
-title = SubElement(mlt, "producer", id="title")
-title_property = SubElement(title, 'property', name="resource")
-title_property = "title.png"
-play_intro = SubElement(mlt, "playlist", id="playlist0")
-producer0 = SubElement(play_intro, "entry producer=\"intro\" in=\"0\" out=\"75\""   )
-producer1 = SubElement(play_intro, "entry producer=\"title\" in=\"75\" out=\"1000000\"")
-'''
-
-
-'''
-        
-    intro = SubElement(mlt, 'producer', id='intro')
-    intro_property = SubElement(intro, "property", name="resource")
-    intro_property.text = "intro.dv"
-    title = SubElement(mlt, "producer", id="title")
-    title_property = SubElement(title, 'property', name="resource")
-    title_property = "title.png"
-    play_intro = SubElement(mlt, "playlist", id="playlist0")
-    producer0 = SubElement(play_intro, "entry producer=\"intro\" in=\"0\" out=\"75\""   )
-    producer1 = SubElement(play_intro, "entry producer=\"title\" in=\"75\" out=\"1000000\"")
-
-    print prettify(mlt)
-
-    tmpmlt.write(prettify(mlt));
-    intro.close()
-'''
-'''
-
-<?xml version="1.0" ?>
-<mlt>
-  <producer id="intro">
-    <property name="resource">intro.dv</property>
-  </producer>
-  <producer id="title">
-    <property name="resource"/>
-  </producer>
-  <playlist id="playlist0">
-    <entry in="0" out="75" producer="intro"/>
-    <entry in="75" out="1000000" producer="title"/>
-  </playlist>
-</mlt>
-
-for i,dvfile in enumerate(dvfiles):
-    irint prettify(mlt)
-if start_file <= i <= end_file:
-       extra = ""
-       if i == start_file:
-          extra = "(start: {0} seconds)".format(start_offset)
-       if i == end_file:
-          extra = "(end: {0} seconds)".format(end_offset)
-       print dvfile, extra
-       #talks[n]["files"][i]["in:", [t for t,v in talks.items() if v["playlist"]]
-    n = prompt_for_number("Select a job")
-
-       print talks[n]["files"][i]
-    else:
-        print talks[n]["files"].remove(i)
-    print talks[n]["files"]
-   <mlt>
- for file in cut_list:
-        <producer id="filename">
-          <property name="resource">filepath/filename</property>
-        </producer>
-        <playlist id="playlist0">
- for file in cut_list:
-            <entry producer="filename" if file[in]: in="file[in]" if file[out] out="file[out]"/>
-        </playlist>
-        </mlt>
-        
-        # print mltfile
-    # do lots of melt calculations or something here
-    # then subprocess.Popen stuff
-
-    print
-    print "----------"
-    print "Available jobs:", [t for t,v in talks.items() if v["files"]]
-    n = prompt_for_number("Select a job")
-'''
