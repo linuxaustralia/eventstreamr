@@ -68,18 +68,15 @@ while n:
     while end_offset is None:
         end_offset = prompt_for_time("End time offset")
 
-    print
-    # this basically prints the cut list which will be used later
+    # this sets up the cut_list which will be used later
     talk['cut_list'] = talk['playlist'][start_file:end_file+1]
-    print talk['cut_list']
     talk['cut_list'][0]['in'] = start_offset
     talk['cut_list'][-1]['out'] = end_offset
-    print talk['cut_list']
-
 
     print "Creating and queuing job " + str(talk['schedule_id'])
-    create_mlt(talk, os.path.join(queue_todo_dir, str(talk['schedule_id']) + '.mlt'))
-    create_title(talk, os.path.join(queue_todo_dir, str(talk['schedule_id']) + '.title.png'))
+    job_file = os.path.join(queue_todo_dir, str(talk['schedule_id']))
+    create_mlt(talk, job_file + '.mlt')
+    create_title(talk, job_file + '.title.png')
 
     print
     print "----------"
