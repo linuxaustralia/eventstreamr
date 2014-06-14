@@ -1,10 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from xml.etree.ElementTree import Element, SubElement, Comment, tostring
-from xml.etree import ElementTree
-from xml.dom import minidom
-
 import urllib2
 import json
 import datetime
@@ -77,24 +73,7 @@ while n:
     talk["cut_list"][0]["in"] = start_offset
     talk["cut_list"][-1]["out"] = end_offset
 
-    # Now onto the xml stuff. Very rough and ready but will clean up when it works. Need sleep will fix it up tomorrow/today ;-)
-    tmpmlt = open(str(talk['schedule_id']) + ".mlt", 'w')
-    mlt = Element('mlt')
-    playlist = SubElement(mlt, "playlist", id="playlist0")
-    for cut_file in talk["cut_list"]:
-        producer = SubElement(mlt, 'producer', id=cut_file["filename"])
-        producer_property = SubElement(producer, "property", name="resource")
-        producer_property.text = cut_file["filepath"] + "/"  + cut_file["filename"]
-        args = {} 
-        args['producer'] = cut_file['filename']
-        #print get_duration(producer_property.text)
-	if 'in' in cut_file and cut_file['in']:
-	    args['in'] = str(cut_file['in'].total_seconds())
-	if 'out' in cut_file and cut_file['out']:
-	    args['out'] = str(cut_file['out'].total_seconds())
-        playlist_entry = SubElement(playlist, "entry", args)
-
-
+    create_mlt(talk, queue_todo_dir + "/" + str(talk['schedule_id']) + ".mlt")
 
     """
     image = Image(width=700, height=200)
