@@ -36,7 +36,8 @@ def move_job(src_dir, dst_dir, jobname):
 
 while True:
     files = os.listdir(queue_todo_dir)
-    for filename in files:
+    if len(files):
+        filename = files[0]
         if fnmatch.fnmatch(filename, '*.mp4'):
             job = filename[:-4]
             print "Starting job " + job
@@ -54,4 +55,6 @@ while True:
                     log.write(stderrdata)
             print "Finished job " + job
             move_job(queue_wip_dir, queue_done_dir, job)
-    time.sleep(10)
+    else:
+        print "Nothing to do, sleeping"
+        time.sleep(10)
