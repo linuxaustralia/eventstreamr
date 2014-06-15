@@ -19,7 +19,7 @@ config_file = "config.json"
 config_data = open_json(config_file)
 
 # should be referencing config data directly
-base_dir = config_data['base_dir']
+base_dir = os.path.abspath(config_data['base_dir'])
 schedule_file = os.path.join(base_dir, config_data['schedule'])
 recording_dir = os.path.join(base_dir, 'recording')
 queue_todo_dir = os.path.join(base_dir, 'queue', 'todo')
