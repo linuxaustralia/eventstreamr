@@ -15,6 +15,7 @@ base_dir = config_data['base_dir']
 queue_todo_dir = os.path.join(base_dir, 'completed')
 queue_wip_dir = os.path.join(base_dir, 'uploading')
 queue_done_dir = os.path.join(base_dir, 'uploaded')
+youtube_log_file = os.path.join(base_dir, 'youtube_uploads.log')
 schedule_file = os.path.join(base_dir, config_data['schedule'])
 json_format="%Y-%m-%d %H:%M:%S"
 
@@ -27,7 +28,7 @@ schedule = { t['schedule_id']: t for t in schedule  }
 def move_job(src_dir, dst_dir, jobname):
     files = os.listdir(src_dir)
     for filename in files:
-        if fnmatch.fnmatch(filename, jobname + '.mp4'):
+        if fnmatch.fnmatch(filename, jobname + '.[lm][op][g4]'):
             src = os.path.join(src_dir, filename)
             dst = os.path.join(dst_dir, filename)
             if not os.path.exists(dst_dir):
@@ -43,14 +44,19 @@ while True:
             print "Starting job " + job
             move_job(queue_todo_dir, queue_wip_dir, job)
 
-            args = ['youtube_upload', '--email=' + email_address, '--password=' + password, '--unlisted', '--title="' + schedule[int(job)]['title'] + '"', '--category="Tech"', '--description="' + schedule[int(job)]['presenters'] + " present " + schedule[int(job)]['abstract'] +'"']
+            upload_file = os.path.join(queue_wip_dir, filename)
+            title = schedule[int(job)]['title']
+            abstract = schedule[int(job)]['abstract']
+            presenters = schedule[int(job)]['presenters']
+            description = abstract + ' by ' + presenters
+            args = ['youtube_upload', '--email=' + email_address, '--password=' + password, '--unlisted', '--title=' + title, '--category=Tech', '--description=' + description, upload_file]
 
             log_file = os.path.join(queue_wip_dir, job + '.log')
-            with open(log_file, 'w') as log:
+            with open(youtube_log_file, 'a') as youtube_log, open(log_file, 'w') as log:
                 process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 (stdoutdata, stderrdata) = process.communicate()
                 if stdoutdata:
-                    log.write(stdoutdata)
+                    youtube_log.write("\t".join([job, stdoutdata.strip(), title]) + "\n")
                 if stderrdata:
                     log.write(stderrdata)
             print "Finished job " + job
