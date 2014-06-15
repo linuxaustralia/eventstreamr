@@ -27,7 +27,7 @@ def get_schedule(schedule_file, json_format):
     # read the schedule file, removing spaces in room names
     raw = open_json(schedule_file)
     schedule_data = {k.replace(" ", ""):v for k,v in raw.items()}
-    fields = ["schedule_id", "presenters", "title", "start", "end"]
+    fields = ["schedule_id", "presenters", "title", "abstract", "start", "end"]
     talks = []
     for schedule_room, schedule_room_data in schedule_data.iteritems():
         for schedule_talk in schedule_room_data:
