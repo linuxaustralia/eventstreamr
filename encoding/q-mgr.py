@@ -29,6 +29,7 @@ json_format="%Y-%m-%d %H:%M:%S"
 
 dv_format="%Y-%m-%d_%H-%M-%S"
 dv_match_window = datetime.timedelta(minutes=10)
+dv_frame_rate = 25
 
 # Load the schedule
 talks = get_schedule(schedule_file, json_format)
@@ -75,7 +76,7 @@ while n:
 
     print "Creating and queuing job " + str(talk['schedule_id'])
     job_file = os.path.join(queue_todo_dir, str(talk['schedule_id']))
-    create_mlt(talk, job_file + '.mlt')
+    create_mlt(talk, job_file + '.mlt', dv_frame_rate)
     create_title(talk, job_file + '.title.png')
 
     print
