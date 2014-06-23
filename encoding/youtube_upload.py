@@ -7,6 +7,7 @@ import fnmatch
 import time
 
 from lib.schedule import *
+from lib.youtube import *
 
 config_file = 'config.json'
 config_data = open_json(config_file)
@@ -19,8 +20,10 @@ youtube_log_file = os.path.join(base_dir, 'youtube_uploads.log')
 schedule_file = os.path.join(base_dir, config_data['schedule'])
 json_format="%Y-%m-%d %H:%M:%S"
 
-email_address = 'username'
-password = 'password'
+client_id = ''
+client_secret = ''
+category_id = 28
+youtube = get_authenticated_youtube_service('youtube_upload.json', client_id, client_secret)
 
 schedule = get_schedule(schedule_file, json_format)
 schedule = { t['schedule_id']: t for t in schedule  }
@@ -45,20 +48,19 @@ while True:
             move_job(queue_todo_dir, queue_wip_dir, job)
 
             upload_file = os.path.join(queue_wip_dir, filename)
-            title = schedule[int(job)]['title']
-            abstract = schedule[int(job)]['abstract']
-            presenters = schedule[int(job)]['presenters']
-            description = abstract + ' by ' + presenters
-            args = ['youtube_upload', '--email=' + email_address, '--password=' + password, '--unlisted', '--title=' + title, '--category=Tech', '--description=' + description, upload_file]
-
-            log_file = os.path.join(queue_wip_dir, job + '.log')
-            with open(youtube_log_file, 'a') as youtube_log, open(log_file, 'w') as log:
-                process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                (stdoutdata, stderrdata) = process.communicate()
-                if stdoutdata:
-                    youtube_log.write("\t".join([job, stdoutdata.strip(), title]) + "\n")
-                if stderrdata:
-                    log.write(stderrdata)
+            upload_video_info = {
+                'snippet': {
+                    'title': schedule[int(job)]['title'],
+                    'description': schedule[int(job)]['abstract'] + ' by ' + schedule[int(job)]['presenters'],
+                    'categoryId': category_id
+                },
+                'status': {
+                    'privacyStatus': 'private'
+                }
+            }
+            upload = resumable_youtube_upload(youtube, os.path.join(queue_wip_dir, filename), upload_video_info)
+            with open(youtube_log_file, 'a') as youtube_log:
+                youtube_log.write("\t".join([job, 'http://www.youtube.com/watch?v=' + upload['id'], upload['snippet']['title']]) + "\n")
             print "Finished job " + job
             move_job(queue_wip_dir, queue_done_dir, job)
     else:
