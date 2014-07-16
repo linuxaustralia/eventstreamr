@@ -74,12 +74,3 @@ class StationConfig:
 # Role configuration classes.
 #
 ########################################################################################################################
-
-
-class RoleConfig:
-
-    def __init__(self):
-        raise Exception("Please don't initialise the RoleConfig object directly")
-
-
-
