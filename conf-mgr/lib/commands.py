@@ -40,7 +40,7 @@ class _ConfigurationHelper:
 
     def __init__(self, role_name):
         self.role_name = role_name
-        self._other_cmds = []
+        self._other_cmds = set()
         self.de_register()
 
     ##### Configuring Command Classes #####
@@ -59,14 +59,14 @@ class _ConfigurationHelper:
 
     def responder(self, cls):
         def decorator(fn):
-            self._other_cmds.append((cls, fn))
-            if __role_locators__[self.role_name]:
+            self._other_cmds.add((cls, fn))
+            if __role_locators__.get(self.role_name, None):
                 # Already registered so update the information.
                 self.register()
         return decorator
 
     def register(self):
-        locator = RoleCommandLocator(self._other_cmds[:])
+        locator = RoleCommandLocator(self._other_cmds)
         __role_locators__[self.role_name] = locator
 
     def de_register(self):
@@ -88,7 +88,6 @@ class RoleCommandLocator:
         self._cmd_dict = cmd_dict
 
     def locate_responder(self, name):
-        print "Checking ", name, " in ", repr(self._cmd_dict)
         if name in self._cmd_dict:
             return self._cmd_dict[name]
 

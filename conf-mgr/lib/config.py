@@ -22,8 +22,8 @@ class StationConfig:
         If this class is constructed with no arguments then the role configuration dictionary is empty.
         If this class is constructed with 1 argument then the given role configuration is stored(without copying).
         """
+        self._roles = {}
         if station_config is None:
-
             if roles_config is None:
                 self.roles = {}
             else:
@@ -35,18 +35,24 @@ class StationConfig:
             self.mac_address = station_config["mac_address"]
             self.roles = station_config["roles"]
 
-    def set_roles(self, roles):
+    @property
+    def roles(self):
+        """
+        All the roles configured for the given station.
+        :rtype : dict
+        """
+        return deepcopy(self._roles)
+    
+    @roles.setter
+    def roles(self, roles):
         # TODO provide a __deepcopy__ implementation for all config objects to support independent copies.
-        self.roles = deepcopy(roles)
-
-    def get_roles(self, roles):
-        pass
+        self._roles = deepcopy(roles)
 
     def has_role_config(self, role_name):
-        return role_name in self.roles
+        return role_name in self._roles
 
     def get_role_config(self, role_name):
-        return self.roles[role_name] if self.has_role_config(role_name) else None
+        return self._roles[role_name] if self.has_role_config(role_name) else None
 
     def reset_interface_information(self):
         import lib.computer_info as ci
@@ -59,7 +65,7 @@ class StationConfig:
             "ip": self.ip,
             "hostname": self.hostname,
             "mac_address": self.mac_address,
-            "roles": self.roles
+            "roles": deepcopy(self.roles)
         }
 
     def __str__(self):
