@@ -6,7 +6,7 @@ from itertools import count as _count
 
 from twisted.protocols.amp import Argument as _Argument
 # Allow items to just import this file and have access to all of the argument types.
-from twisted.protocols.amp import Integer, String, Float, Boolean, Unicode, Path
+from twisted.protocols.amp import Integer, Float, Boolean, Unicode, Path
 
 CHUNK_MAX = 0xffff
 
@@ -17,11 +17,21 @@ class Transport(_Argument):
         _Argument.__init__(self, optional=True)
 
     def fromBox(self, name, strings, objects, proto):
-        print "fromBox " , name, strings
         objects[name] = proto.transport  # The object will be filled in here
 
     def toBox(self, name, strings, objects, proto):
-        print "toBox " , name, objects
+        strings[name] = ""  # The object will be filled in on the other end.
+
+class BoxSender(_Argument):
+    optional = True  # No need to put this as an argument when calling.
+
+    def __init__(self):
+        _Argument.__init__(self, optional=True)
+
+    def fromBox(self, name, strings, objects, proto):
+        objects[name] = proto.boxSender  # The object will be filled in here
+
+    def toBox(self, name, strings, objects, proto):
         strings[name] = ""  # The object will be filled in on the other end.
 
 class BigString(_Argument):
