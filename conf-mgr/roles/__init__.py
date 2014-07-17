@@ -7,6 +7,23 @@ This file defines the storage for the roles.
 
 """
 
+__factories__ = {}
+
+
+def register_factory(name, factory):
+    """Register the given factory as the given name. The factory object should be an initialised RoleFactory."""
+    __factories__[name] = factory
+
+
+def get_factory(name):
+    """Get the factory for the name or None if no factory is registered under that name."""
+    return __factories__.get(name, None)
+
+
+def get_factory_names():
+    """Get the names of all the factories registered."""
+    return __factories__.iterkeys()
+
 
 class RoleConfig(object):
 
@@ -22,17 +39,12 @@ class RoleFactory(object):
     def build(self, given_config):
         """
         Start a new implementation of the role using given_config to configure it.
-        This method should return a dictionary laid out as follows:
-        {
-         "object": The actual implementation.
-         "config":
-        }
-        Where the config pair is optional and should be used if the `given_config` needs to be updated.
-        If `given_config` is updated then the uuid MUST NOT change.
+        This method should create a new role with the given configuration. If this method is unable to make a role
+        using the given configuration then it should throw an exception.
 
         This method should be implemented by subclasses.
         """
-        return {"object": None, "config": given_config}
+        return None
 
 
 class SingletonRoleFactory(RoleFactory):
@@ -45,12 +57,9 @@ class SingletonRoleFactory(RoleFactory):
         if self.instance is None or self.instance.is_stopped:
             self.instance = self.build_singleton()
 
-        updated_config = self.instance.update(given_config)
+        self.instance.update(given_config)
 
-        if updated_config is not None:
-            return {"object": self.instance, "config": updated_config}
-        else:
-            return {"object": self.instance}
+        return self.instance
 
     def build_singleton(self):
         """
@@ -63,7 +72,7 @@ class SingletonRoleFactory(RoleFactory):
 class Role(object):
 
     def update(self, config):
-        return None
+        pass
 
     def stop(self):
         pass
