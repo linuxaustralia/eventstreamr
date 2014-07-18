@@ -14,7 +14,7 @@ station_commands = configuration_helper("station")
 class RegisterStationCommand(amp.Command):
     arguments = [('config', amp_args.Object()),
                  ('transport', amp_args.Transport())]
-    response = [('config', amp_args.Object())]
+    response = []
 
 
 
