@@ -6,9 +6,10 @@ from itertools import count as _count
 
 from twisted.protocols.amp import Argument as _Argument
 # Allow items to just import this file and have access to all of the argument types.
-from twisted.protocols.amp import Integer, Float, Boolean, Unicode, Path
+from twisted.protocols.amp import Integer, Float, Boolean, Unicode, Path, Command
 
 CHUNK_MAX = 0xffff
+
 
 class Transport(_Argument):
     optional = True  # No need to put this as an argument when calling.
@@ -22,6 +23,7 @@ class Transport(_Argument):
     def toBox(self, name, strings, objects, proto):
         strings[name] = ""  # The object will be filled in on the other end.
 
+
 class BoxSender(_Argument):
     optional = True  # No need to put this as an argument when calling.
 
@@ -33,6 +35,7 @@ class BoxSender(_Argument):
 
     def toBox(self, name, strings, objects, proto):
         strings[name] = ""  # The object will be filled in on the other end.
+
 
 class BigString(_Argument):
     """
@@ -59,14 +62,14 @@ class BigString(_Argument):
 
     def toBox(self, name, strings, objects, proto):
         value = _StringIO(self.from_value(objects[name]))
-        firstChunk = value.read(CHUNK_MAX)
-        strings[name] = firstChunk
+        first_chunk = value.read(CHUNK_MAX)
+        strings[name] = first_chunk
         counter = 2
         while True:
-            nextChunk = value.read(CHUNK_MAX)
-            if not nextChunk:
+            next_chunk = value.read(CHUNK_MAX)
+            if not next_chunk:
                 break
-            strings["%s.%d" % (name, counter)] = nextChunk
+            strings["%s.%d" % (name, counter)] = next_chunk
             counter += 1
 
     def from_value(self, value):
@@ -97,3 +100,6 @@ class Object(BigUnicode):
 
     def from_value(self, value):
         return BigUnicode.from_value(self, _pickle.dumps(value))
+
+__all__ = ["BigString", "BigUnicode", "Boolean", "BoxSender", "Command", "Float", "Integer", "Object", "Path",
+           "Transport", "Unicode"]
