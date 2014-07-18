@@ -1,123 +1,75 @@
-from twisted.internet.main import CONNECTION_DONE
-
 __author__ = "Lee Symes"
 
+import logging
 
-from twisted.internet import reactor, task
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.protocol import ReconnectingClientFactory
+from twisted.application import internet
+from twisted.application.service import Application, MultiService
 from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
-from twisted.internet.error import ConnectError
-from twisted.protocols.amp import AMP
 
-from lib.commands import ConfiguredCommandAMP
+from lib.commands import ListenableConfiguredAMP
 from lib.general_commands import RegisterStationCommand
-from lib.file_helper import load_json
-from lib.config import StationConfig
-import roles
+from lib.file_helper import load_json, save_json, isfile
+from lib.config import StationConfig, ConfigurationManagerService
 
+log = logging.getLogger("station")
 # Load the config as a dictionary from the JSON file.
-static_config = load_json("station.json")
 
-role_config = StationConfig() # TODO load roles file.
+class StationClientFactory(ReconnectingClientFactory):
+    maxDelay = 30
+    initialDelay = 5
 
-executing_roles = {}
-"""
-:type dict(string, roles.Role)
-"""
+    def __init__(self):
+        self.amp = ListenableConfiguredAMP(start=self.connected)
+        # When the protocol is started, reset the delay in here.
 
-manager_endpoint = TCP4ClientEndpoint(reactor, static_config["manager_address"], static_config["manager_port"])
+    def buildProtocol(self, address):
+        return self.amp
 
-connection = None
-
-@inlineCallbacks
-def attempt_connection():
-    print "Attempting to connect..."
-    try:
-        conn = yield connectProtocol(manager_endpoint, ConfiguredCommandAMP())
-        global connection
-        connection = conn
-        yield register_station()
-    except ConnectError:
-        # Couldn't connect so try again in 30 seconds.
-        print "Failed to connect so I'll try again in a few seconds"
-        reactor.callLater(30, attempt_connection)
-    update_executing_roles()
+    def connected(self, box_sender):
+        self.resetDelay()
+        register_station(box_sender)
 
 
-@inlineCallbacks
-def register_station():
+def register_station(connection):
     print "Attempting to register station and update configs."
     if not connection:
         print "Called too early"
         return
 
-    new_roles = yield connection.callRemote(RegisterStationCommand, config=role_config)
-    role_config.roles = new_roles["config"]
+    # Make the manager send the configs as a new command to allow us to send errors back.
+    # Station still sends existing config on the 'hello' command.
+    connection.callRemote(RegisterStationCommand, config=role_config)
 
-    print "New Roles: ", repr(new_roles)
     print "New Config:", repr(role_config)
 
 
-def update_executing_roles():
-    check_roles()
-    uuids = set()
-    for role, config in role_config.roles.iteritems():
-        factory = roles.get_factory(role)
-        if isinstance(config, (dict)):
-            uuids.add(init_role(factory, config))
-        else:
-            for config_item in config:
-                uuids.add(init_role(factory, config_item))
-
-    removed_uuids = set(executing_roles.iterkeys()) - uuids
-    for uuid in removed_uuids:
-        executing_roles[uuid].stop()
+def load_role_config():
+    config = StationConfig(blocked_roles=static_config["blocked_roles"])
+    if isfile(static_config["dynamic_config"]):
+        config.roles = load_json(static_config["dynamic_config"])
+    return config
 
 
-def init_role(factory, config):
-    """
+def save_role_config(config):
+    roles = config.roles
+    save_json(roles, static_config["dynamic_config"])
 
+static_config = load_json("station.json")
 
-    :type factory: roles.RoleFactory
-    :param factory:
-    :param config:
-    :raise Exception:
-    """
-    print "Starting configuration using config: ", config
-    print "Given Factory: ", factory
-    if "uuid" not in config or not config["uuid"]:
-        raise Exception("Invalid config. Must have a server defined UUID. Unable to continue.")
-    uuid = config["uuid"]
-    if uuid in executing_roles:
-        print "Updating `" + uuid + "`'s config"
-        executing_roles[uuid].update(config)
-    else:
-        print "Creating new with UUID=`" + uuid + "`"
-        new_role = factory.build(config)
-        executing_roles[uuid] = new_role
-    return uuid
+role_config = load_role_config()
 
+service_wrapper = MultiService()
 
+configuration_manager_service = ConfigurationManagerService(role_config, update_callback=save_role_config)
+configuration_manager_service.setServiceParent(service_wrapper)
 
+client = internet.TCPClient(static_config["manager_address"], static_config["manager_port"], StationClientFactory())
+client.setServiceParent(service_wrapper)
 
+application = Application("EventStreamr Station")
+service_wrapper.setServiceParent(application)
 
-def check_roles():
-    new_roles = set(role_config.roles.iterkeys())
-    unconfigured_roles = new_roles - set(roles.get_factory_names())
-    if unconfigured_roles:
-        for role in unconfigured_roles:
-            print "ERR: Not loading `%s` as it is does not have a factory." % role
-            role_config.roles.pop(role) # Remove it to prevent it from saving.
-
-
-def do_roles_polling():
-    pass
-
-def doRun():
-    attempt_connection()
-    do_roles_polling()
-    reactor.run()
-
-print dir(reactor)
-
-doRun()
+if __name__ == "__main__":
+    print "Please run this file using the following command - It makes life easier."
+    print "\ttwistd --nodaemon --python station.py"
