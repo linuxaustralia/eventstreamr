@@ -74,6 +74,9 @@ class RoleFactory(object):
 
 
 class Role(Service, object):
+    """
+    This class is safe to be implemented with MultiService as it provides no implementations of Service methods.
+    """
 
     def __init__(self):
         Service.__init__(self)

@@ -6,7 +6,7 @@ from twisted.internet import reactor
 
 from lib.amp import arguments as amp
 from lib.commands import configuration_helper
-from roles import RoleConfig, RoleFactory, Role
+from roles import RoleFactory, Role, register_factory
 
 _encode_job_station = configuration_helper("encode jobs(On Station)")
 _encode_job_manager = configuration_helper("encode jobs(On Manager)")
@@ -33,16 +33,6 @@ class EncodeFailed(amp.Command):
     response = []
 
 
-class EncodeRoleConfig(RoleConfig):
-
-    def __init__(self, in_dict):
-        super(EncodeRoleConfig, self).__init__()
-        self.command = in_dict["command"]
-
-    def __dict__(self):
-        return {"command": self.command}
-
-
 class EncodeRole(Role):
 # These should probably be services that are started and stopped. I think
 # http://krondo.com/wp-content/uploads/2009/08/twisted-intro.html#post-2345
@@ -53,18 +43,15 @@ class EncodeRole(Role):
         self.config = {}
 
     def start_encode(self, sender, job_uuid, input_files_and_cutoffs, output_file):
-        print "Starting to encode job %s" % (job_uuid, )
         EncodeRunner(sender, job_uuid, self.config["command"], input_files_and_cutoffs, output_file).start()
         return {"accepted": True}
 
     def startService(self):
         _encode_job_station.responder(StartEncodeRequest)(self.start_encode)
         _encode_job_station.register()
-        print "Registered myself with the encode job."
         super(EncodeRole, self).startService()
 
     def update(self, config):
-        print "Updating configs: ", config
         self.config = config
 
     def stopService(self):
@@ -87,13 +74,12 @@ class EncodeRoleFactory(RoleFactory):
         super(EncodeRoleFactory, self).__init__()
 
     def build(self):
-        print "Building Singleton"
         return EncodeRole()
 
 
 encode_factory = EncodeRoleFactory()
 
-from roles import register_factory
+
 register_factory("encode", encode_factory)
 
 
