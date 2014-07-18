@@ -1,39 +1,43 @@
 __author__ = 'Lee Symes'
-
-
-"""
-This file holds the data structures for the configuration of the various roles.
-
-
-Notes:
- - These all implement a __dict__ method.
+__doc__ = """
+This file holds the Station configuration along with a configuration service which will update the given config when
+it is requested.
 """
 
 from copy import deepcopy
 
+from twisted.application.service import MultiService
+
+from lib.amp import arguments as amp_args
+from lib.commands import configuration_helper, Command
+from lib.exceptions import MissingRoleFactoryException, BlockedRoleException, InvalidConfigurationException
+from lib.station.manager import AllRolesManagerService
+
 
 class StationConfig:
 
-    def __init__(self, roles_config=None, station_config=None):
+    def __init__(self, roles_config=None, blocked_roles=None, station_config=None):
         """
         This class creates a root configuration for transmission or a configuration from a role configuration
          dictionary.
 
-        If this class is constructed with no arguments then the role configuration dictionary is empty.
-        If this class is constructed with 1 argument then the given role configuration is stored(without copying).
+        If `station_config` is not specified then the configuration is taken from `roles_config` and `blocked_roles`;
+            and the `ip`, `hostname` and `mac_address` are updated from the current computer's information.
+        Otherwise the config is taken directly from the dictionary `station_config`. It is assumed that this dictionary
+            has `ip`, `hostname`, `mac_address`, `blocked_roles` and `roles` as keys.
         """
         self._roles = {}
+        self._blocked_roles = set(blocked_roles) or []
         if station_config is None:
-            if roles_config is None:
-                self.roles = {}
-            else:
+            if roles_config is not None:
                 self.roles = roles_config
             self.reset_interface_information()
         else:
-            self.ip = station_config["ip"]
-            self.hostname = station_config["hostname"]
-            self.mac_address = station_config["mac_address"]
-            self.roles = station_config["roles"]
+            self._ip = station_config["ip"]
+            self._hostname = station_config["hostname"]
+            self._mac_address = station_config["mac_address"]
+            self._blocked_roles = set(station_config["blocked_roles"])
+            self.roles = station_config["roles"]  # Use the setter.
 
     @property
     def roles(self):
@@ -45,8 +49,15 @@ class StationConfig:
     
     @roles.setter
     def roles(self, roles):
-        # TODO provide a __deepcopy__ implementation for all config objects to support independent copies.
-        self._roles = deepcopy(roles)
+        self._roles = deepcopy(dict(roles))
+
+    @property
+    def blocked_roles(self):
+        return set(self._blocked_roles)
+
+    ip = property(lambda self: self._ip)
+    hostname = property(lambda self: self._hostname)
+    mac_address = property(lambda self: self._mac_address)
 
     def has_role_config(self, role_name):
         return role_name in self._roles
@@ -56,27 +67,77 @@ class StationConfig:
 
     def reset_interface_information(self):
         import lib.computer_info as ci
-        self.ip = ci.computer_ip()
-        self.hostname = ci.computer_hostname()
-        self.mac_address = ci.computer_mac_address()
+        self._ip = ci.computer_ip()
+        self._hostname = ci.computer_hostname()
+        self._mac_address = ci.computer_mac_address()
 
     def __dict__(self):
         return {
             "ip": self.ip,
             "hostname": self.hostname,
             "mac_address": self.mac_address,
-            "roles": deepcopy(self.roles)
+            "roles": self.roles,
+            "blocked_roles": self.blocked_roles
         }
 
     def __str__(self):
-        return "StationConfig: %s(%s;%s); Roles: %s" % (self.hostname, self.ip, self.mac_address,
-                                                        ", ".join([k for k, v in self.roles.items() if v]))
+        return "StationConfig: %s(%s;%s);" \
+               " Blocked Roles: %s;" \
+               " Roles: %s" % (self.hostname, self.ip, self.mac_address,
+                               ", ".join(self.blocked_roles),
+                               ", ".join([k for k, v in self.roles.items() if v]))
 
     def __repr__(self):
         return "%s(station_config=%s)" % (self.__class__, repr(self.__dict__))
 
-#####################################################ROLE CONFIG########################################################
-#
-# Role configuration classes.
-#
-########################################################################################################################
+# Configuration update services.
+
+_configuration_commands = configuration_helper("Config Update Commands")
+
+
+@_configuration_commands.command
+class UpdateConfiguration(Command):
+    arguments = [('roles', amp_args.Object())]
+    response = []
+    errors = {
+        MissingRoleFactoryException: "MISSING_ROLE_FACTORY",
+        BlockedRoleException: "ROLE_BLOCKED",
+        InvalidConfigurationException: "INVALID_CONFIGURATION"}
+
+
+class ConfigurationManagerService(MultiService):
+
+    def __init__(self, role_config, update_callback=lambda: None):
+        """
+
+        :param role_config: The configuration object loaded with all the necessary information.
+        :type role_config: StationConfig
+        :param update_callback:
+        :type update_callback: () -> None
+        :return:
+        """
+        MultiService.__init__(self)
+        self._role_manager_service = AllRolesManagerService(role_config.blocked_roles)
+        self._role_manager_service.setServiceParent(self)
+        self._role_config = role_config
+        self._update_callback = update_callback
+
+    def startService(self):
+        _configuration_commands.responder(UpdateConfiguration)(self.update_configuration)
+        _configuration_commands.register()
+        MultiService.startService(self)
+
+    def stopService(self):
+        _configuration_commands.de_register()
+        _configuration_commands.remove_responder(self.update_configuration)
+        MultiService.stopService(self)
+
+    def update_configuration(self, roles):
+        roles = dict(roles)
+        if self._role_config.roles != roles:
+            self._role_manager_service.configure(roles)
+            self.update_configuration(roles)
+
+
+
+
