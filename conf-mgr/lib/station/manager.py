@@ -124,7 +124,7 @@ class RoleManagerService(NamedMultiService):
             existing_uuids = set(self.namedServices.iterkeys())
             updated_uuids = set(mapped_config.iterkeys())
 
-            if len(updated_uuids) > self.factory.instances:
+            if self.factory.instances > 0 and len(updated_uuids) > self.factory.instances:
                 _log.error("Failed to update as there are too many new uuids. %d uuids > max %d instances",
                            len(updated_uuids), self.factory.instances)
                 raise InvalidConfigurationException("Failed to update as there are too many new uuids. %d uuids >"
