@@ -6,6 +6,7 @@ This file contains helper functions for managing AMP commands.
 
 
 import twisted.protocols.amp as amp
+from twisted.protocols.amp import Command
 
 __role_locators__ = {}
 
@@ -13,8 +14,7 @@ __role_locators__ = {}
 class ConfiguredCommandLocator(amp.CommandLocator):
 
     def __init__(self):
-        print "Inside", repr(__role_locators__)
-        pass
+        super(ConfiguredCommandLocator, self).__init__()
 
     def locateResponder(self, name):
         for locator in __role_locators__.values():
@@ -27,13 +27,48 @@ class ConfiguredCommandLocator(amp.CommandLocator):
         print "Failed to locate responder for ", name
 
 
-class ConfiguredCommandAMP(amp.AMP, ConfiguredCommandLocator):
+class ConfiguredCommandAMP(ConfiguredCommandLocator, amp.AMP):
 
     def __init__(self, boxReceiver=None):
+        ConfiguredCommandLocator.__init__(self)
         amp.AMP.__init__(self, boxReceiver=boxReceiver, locator=self)
 
-    def locateResponder(self, name):
-        return ConfiguredCommandLocator.locateResponder(self, name)
+
+class ListenableConfiguredAMP(ConfiguredCommandAMP):
+    """
+    This class monitors connection and disconnection
+
+    """
+
+    def __init__(self,
+                 start=lambda self, box_sender: None,
+                 stop=lambda self, reason: None):
+        """
+        :param start: A function handle that is called when a connection starts.
+        :type start: (ListenableConfiguredAMP, IBoxSender) -> None
+        :param stop: A function handle that is called when a connection stops.
+        :type stop: (ListenableConfiguredAMP, Failure) -> None
+        """
+
+        self._start_receiving_listener = start
+        self._stop_receiving_listener = stop
+        super(ListenableConfiguredAMP, self).__init__()
+
+    def startReceivingBoxes(self, box_sender):
+        self._start_receiving_listener(self, box_sender)
+        return super(ListenableConfiguredAMP, self).startReceivingBoxes(box_sender)
+
+    def sendBox(self, box):
+        print "Sending:  ", box
+        super(ListenableConfiguredAMP, self).sendBox(box)
+
+    def ampBoxReceived(self, box):
+        print "Received: ", box
+        super(ListenableConfiguredAMP, self).ampBoxReceived(box)
+
+    def stopReceivingBoxes(self, reason):
+        self._stop_receiving_listener(self, reason)
+        return super(ListenableConfiguredAMP, self).stopReceivingBoxes(reason)
 
 
 class _ConfigurationHelper:
@@ -53,7 +88,7 @@ class _ConfigurationHelper:
     def _configure_cmd_class(self, cmd_class, sub_name=None):
         if sub_name is None:
             sub_name = cmd_class.__name__
-        cmd_class.commandName = self.role_name + "__" + sub_name
+        cmd_class.commandName = self.role_name + " => " + sub_name
 
     ##### Configuring Responder Functions #####
 
@@ -64,6 +99,33 @@ class _ConfigurationHelper:
                 # Already registered so update the information.
                 self.register()
         return decorator
+
+    def remove_responder(self, cls=None, fn=None):
+        if not isinstance(cls, Command):  # Support people being lazy.
+            fn = cls
+            cls = None
+
+        if cls is None and fn is None:
+            raise ValueError("Must specify at least one argument")
+        elif cls is None:
+            for clz, func in self._other_cmds:
+                if func == fn:
+                    cls = clz
+                    break
+        elif fn is None:
+            for clz, func in self._other_cmds:
+                if clz == cls:
+                    fn = func
+                    break
+        # Safely remove responder by checking function & class
+        try:
+            self._other_cmds.remove((cls, fn))
+            if __role_locators__.get(self.role_name, None):
+                # Already registered so update the information.
+                self.register()
+            return True
+        except ValueError:
+            return False
 
     def register(self):
         locator = RoleCommandLocator(self._other_cmds)
@@ -95,5 +157,6 @@ class RoleCommandLocator:
 def configuration_helper(role_name):
     """
     Creates a configuration helper to allow for easier configuration and registration of commands.
+    :param role_name:
     """
     return _ConfigurationHelper(role_name)
