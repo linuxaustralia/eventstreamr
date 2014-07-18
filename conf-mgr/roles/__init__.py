@@ -73,7 +73,7 @@ class RoleFactory(object):
         return None
 
 
-class Role(Service):
+class Role(Service, object):
 
     def __init__(self):
         Service.__init__(self)
