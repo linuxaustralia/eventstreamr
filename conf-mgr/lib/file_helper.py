@@ -32,6 +32,10 @@ def read_in(file):
     with open(file, "r") as f:
         return f.read()
 
+def isfile(file):
+    import os
+    return os.path.isfile(file)
+
 
 def list_files_in(folder, expand_subdirectories=False):
     import os
