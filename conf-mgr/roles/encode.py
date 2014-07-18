@@ -1,33 +1,35 @@
 __author__ = 'Lee Symes'
 
 
-from twisted.protocols import amp
+from twisted.internet import protocol
+from twisted.internet import reactor
 
-from lib.amp import arguments as amp_args
+from lib.amp import arguments as amp
 from lib.commands import configuration_helper
-from roles import RoleConfig, SingletonRoleFactory, SingletonRole
+from roles import RoleConfig, RoleFactory, Role
 
 _encode_job_station = configuration_helper("encode jobs(On Station)")
 _encode_job_manager = configuration_helper("encode jobs(On Manager)")
 
+
 @_encode_job_station.command
 class StartEncodeRequest(amp.Command):
-    arguments = [('transport', amp_args.BoxSender()),
-                 ('job_uuid', amp_args.Unicode()),
-                 ('input_files_and_cutoffs', amp_args.Object()),
-                 ('output_file', amp_args.Unicode())]
-    response = [('accepted', amp_args.Boolean())]
+    arguments = [('transport', amp.BoxSender()),
+                 ('job_uuid', amp.Unicode()),
+                 ('input_files_and_cutoffs', amp.Object()),
+                 ('output_file', amp.Unicode())]
+    response = [('accepted', amp.Boolean())]
 
 
 @_encode_job_manager.command
 class EncodeCompleted(amp.Command):
-    arguments = [('uuid', amp_args.Unicode())]
+    arguments = [('uuid', amp.Unicode())]
     response = []
 
 @_encode_job_manager.command
 class EncodeFailed(amp.Command):
-    arguments = [('uuid', amp_args.Unicode()),
-                 ('failure_information', amp_args.Object())]
+    arguments = [('uuid', amp.Unicode()),
+                 ('failure_information', amp.Object())]
     response = []
 
 
@@ -41,29 +43,35 @@ class EncodeRoleConfig(RoleConfig):
         return {"command": self.command}
 
 
-class EncodeRole(SingletonRole):
+class EncodeRole(Role):
 # These should probably be services that are started and stopped. I think
 # http://krondo.com/wp-content/uploads/2009/08/twisted-intro.html#post-2345
 # This also mentions how to initilise twisted as a daemon.
+
     def __init__(self):
-        super(SingletonRole, self).__init__()
+        super(EncodeRole, self).__init__()
+        self.config = {}
+
+    def start_encode(self, sender, job_uuid, input_files_and_cutoffs, output_file):
+        print "Starting to encode job %s" % (job_uuid, )
+        EncodeRunner(sender, job_uuid, self.config["command"], input_files_and_cutoffs, output_file).start()
+        return {"accepted": True}
+
+    def startService(self):
         _encode_job_station.responder(StartEncodeRequest)(self.start_encode)
         _encode_job_station.register()
         print "Registered myself with the encode job."
-
-    def start_encode(self, transport, job_uuid, input_files_and_cutoffs, output_file):
-        print "Starting to encode job %s" % (job_uuid, )
-        EncodeRunner(transport, job_uuid, self.config["command"], input_files_and_cutoffs, output_file).start()
-        return {"accepted": True}
+        super(EncodeRole, self).startService()
 
     def update(self, config):
         print "Updating configs: ", config
         self.config = config
 
-    def stop(self):
-        super(SingletonRole, self).stop()
+    def stopService(self):
         # No longer responsible for encoding so de-list it as an option.
+        _encode_job_station.remove_responder(StartEncodeRequest, self.start_encode)
         _encode_job_station.de_register()
+        super(EncodeRole, self).stopService()
 
 
 ########################################################################################################################
@@ -71,12 +79,14 @@ class EncodeRole(SingletonRole):
 ########################################################################################################################
 
 
-class EncodeRoleFactory(SingletonRoleFactory):
+class EncodeRoleFactory(RoleFactory):
+
+    instances = 1
 
     def __init__(self):
         super(EncodeRoleFactory, self).__init__()
 
-    def build_singleton(self):
+    def build(self):
         print "Building Singleton"
         return EncodeRole()
 
@@ -91,29 +101,26 @@ register_factory("encode", encode_factory)
 #                                   BEGIN ROLE ENCODE IMPLEMENTATION                                                   #
 ########################################################################################################################
 
-from twisted.internet import protocol
-from twisted.internet.error import ProcessDone, ProcessTerminated
-from twisted.internet import reactor
-
 
 class EncodeRunner(object):
 
-    def __init__(self, transport, uuid, command, input_files_and_cutoffs, output_file):
-        self.transport = transport
+    def __init__(self, sender, uuid, command, input_files_and_cutoffs, output_file):
+        self.sender = sender
         self.uuid = uuid
         self.command = command
         self.input_files_and_cutoffs = input_files_and_cutoffs
         self.output_file = output_file
 
     def start(self):
-        pp = EncodeProcessProtocol(self.transport, self.uuid)
+        pp = EncodeProcessProtocol(self.sender, self.uuid)
+        # TODO spawn this process as a sub-service of the EncodeRole.
         reactor.spawnProcess(pp, self.command, (str(self.input_files_and_cutoffs), self.output_file))
 
 
 class EncodeProcessProtocol(protocol.ProcessProtocol):
 
-    def __init__(self, transport, uuid, stdin="Hello World"):
-        self._transport = transport
+    def __init__(self, sender, uuid, stdin="Hello World"):
+        self.sender = sender
         self.uuid = uuid
         self.stdin = stdin
 
@@ -131,12 +138,12 @@ class EncodeProcessProtocol(protocol.ProcessProtocol):
 
     def processEnded(self, reason):
         if reason.value.exitCode == 0:
-            self._transport.callRemote(EncodeCompleted, uuid=self.uuid)
+            self.sender.callRemote(EncodeCompleted, uuid=self.uuid)
         else:
-            self._transport.callRemote(EncodeFailed,
-                                       uuid=self.uuid,
-                                       failure_information={"exitCode": reason.value.exitCode,
-                                                            "signal": reason.value.signal})
+            self.sender.callRemote(EncodeFailed,
+                                   uuid=self.uuid,
+                                   failure_information={"exitCode": reason.value.exitCode,
+                                                        "signal": reason.value.signal})
 
 
 
