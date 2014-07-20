@@ -1,47 +1,47 @@
+#!/usr/bin/python
 __author__ = "Lee Symes"
 
-import logging
-
-from twisted.internet.protocol import ReconnectingClientFactory
 from twisted.application import internet
 from twisted.application.service import Application, MultiService
-from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
+from twisted.internet.defer import inlineCallbacks
+from twisted.internet.protocol import ReconnectingClientFactory
+from twisted.python import log
 
 from lib.commands import ListenableConfiguredAMP
 from lib.general_commands import RegisterStationCommand
 from lib.file_helper import load_json, save_json, isfile
 from lib.config import StationConfig, ConfigurationManagerService
 
-log = logging.getLogger("station")
-# Load the config as a dictionary from the JSON file.
 
 class StationClientFactory(ReconnectingClientFactory):
     maxDelay = 30
     initialDelay = 5
 
     def __init__(self):
-        self.amp = ListenableConfiguredAMP(start=self.connected)
+        pass
         # When the protocol is started, reset the delay in here.
 
     def buildProtocol(self, address):
-        return self.amp
+        return ListenableConfiguredAMP(start=self.connected)
 
-    def connected(self, box_sender):
+    def connected(self, amp, box_sender):
         self.resetDelay()
         register_station(box_sender)
 
 
+@inlineCallbacks
 def register_station(connection):
-    print "Attempting to register station and update configs."
-    if not connection:
-        print "Called too early"
-        return
+    log.msg("Attempting to register station and update configs.")
+    #print repr(connection)
 
     # Make the manager send the configs as a new command to allow us to send errors back.
     # Station still sends existing config on the 'hello' command.
-    connection.callRemote(RegisterStationCommand, config=role_config)
+    try:
+        yield connection.callRemote(RegisterStationCommand, config=role_config)
+    except Exception as e:
+        log.err(_why="Failed to call remote manager to say hello")
 
-    print "New Config:", repr(role_config)
+    log.msg("New Config:" + repr(role_config))
 
 
 def load_role_config():
@@ -51,8 +51,7 @@ def load_role_config():
     return config
 
 
-def save_role_config(config):
-    roles = config.roles
+def save_role_config(roles):
     save_json(roles, static_config["dynamic_config"])
 
 static_config = load_json("station.json")
@@ -72,4 +71,4 @@ service_wrapper.setServiceParent(application)
 
 if __name__ == "__main__":
     print "Please run this file using the following command - It makes life easier."
-    print "\ttwistd --nodaemon --python station.py"
+    print "\ttwistd --pidfile station.pid --nodaemon --python station.py"
