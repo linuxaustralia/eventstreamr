@@ -55,8 +55,9 @@ class ListenableConfiguredAMP(ConfiguredCommandAMP):
         super(ListenableConfiguredAMP, self).__init__()
 
     def startReceivingBoxes(self, box_sender):
+        r = super(ListenableConfiguredAMP, self).startReceivingBoxes(box_sender)
         self._start_receiving_listener(self, box_sender)
-        return super(ListenableConfiguredAMP, self).startReceivingBoxes(box_sender)
+        return r
 
     def sendBox(self, box):
         print "Sending:  ", box
@@ -67,8 +68,9 @@ class ListenableConfiguredAMP(ConfiguredCommandAMP):
         super(ListenableConfiguredAMP, self).ampBoxReceived(box)
 
     def stopReceivingBoxes(self, reason):
+        r = super(ListenableConfiguredAMP, self).stopReceivingBoxes(reason)
         self._stop_receiving_listener(self, reason)
-        return super(ListenableConfiguredAMP, self).stopReceivingBoxes(reason)
+        return r
 
 
 class _ConfigurationHelper:
@@ -124,7 +126,7 @@ class _ConfigurationHelper:
                 # Already registered so update the information.
                 self.register()
             return True
-        except ValueError:
+        except KeyError:
             return False
 
     def register(self):
