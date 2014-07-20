@@ -1,16 +1,11 @@
-from twisted.internet.defer import DeferredList
-
 __author__ = 'lee'
 
-import logging
-
 from twisted.application.service import MultiService
+from twisted.internet.defer import DeferredList, maybeDeferred
+from twisted.python import log
 
 from lib.exceptions import InvalidConfigurationException, BlockedRoleException, MissingRoleFactoryException
 from roles import get_factory, get_factory_names
-
-# Create a python logger for the manager
-_log = logging.getLogger("lib.station.manager")
 
 
 class NamedMultiService(MultiService):
@@ -22,8 +17,6 @@ class NamedMultiService(MultiService):
     def addService(self, service):
         if service.name is None:
             raise NameError("Trying to add a service without a name. %r" % service)
-        if service.name not in get_factory_names():
-            raise NameError("Trying to add a service with a name that isn't a role. %r" % service)
         MultiService.addService(self, service)
 
     def removeNamedService(self, name):
@@ -32,7 +25,7 @@ class NamedMultiService(MultiService):
     def removeAllNamedServices(self, names, callback=None, add_name=True, *args, **kwargs):
         deferred_list = []
         for name in names:
-            stop_deferred = self.removeNamedService(name)
+            stop_deferred = maybeDeferred(self.removeNamedService, name)
             deferred_list.append(stop_deferred)
             if callback:
                 if add_name:
@@ -69,9 +62,9 @@ class AllRolesManagerService(NamedMultiService):
                 self.addService(new_manager)
 
     def role_manager_shutdown(self, result, name):
-        _log.info("Completed shutdown of `%s`.", name)
-        _log.info("Result of shutdown: %r", result)
-        _log.info("Current roles registered: %r", self.namedServices.iterkeys())
+        log.msg("Completed shutdown of `%s`." % name)
+        log.msg("Result of shutdown: %r" % result)
+        log.msg("Current roles registered: %r" % self.namedServices.iterkeys())
 
     def _check_all_roles_valid(self, roles):
         """
@@ -85,22 +78,22 @@ class AllRolesManagerService(NamedMultiService):
         factories = set(get_factory_names())
         blocked_roles = self.blocked_roles.intersection(new_roles)
         if blocked_roles:
-            _log.error("The station was requested to run a role it is blocked from running.")
-            _log.error("Currently blocked roles: %r", self.blocked_roles)
+            log.err(_why="The station was requested to run a role it is blocked from running.")
+            log.err(_why="Currently blocked roles: %r" % self.blocked_roles)
             for role in blocked_roles:
-                _log.error("`%s` is blocked from being loaded on this station", role)
-                _log.error("Configuration given for `%s`: %r", role, roles[role])
+                log.err(_why="`%s` is blocked from being loaded on this station" % role)
+                log.err(_why="Configuration given for `%s`: %r" % (role, roles[role]))
                 roles.pop(role)  # Remove it to prevent it from saving.
             raise BlockedRoleException("Invalid config file received. See logs for more information. "
                                        "Blocked Roles: %r" % blocked_roles)
 
         missing_roles = new_roles - factories
         if missing_roles:
-            _log.error("Failed to locate the following factories.")
-            _log.error("Currently defined factory names: %r", factories)
+            log.err(_why="Failed to locate the following factories.")
+            log.err(_why="Currently defined factory names: %r" % factories)
             for role in missing_roles:
-                _log.error("`%s` does not have a factory configured.", role)
-                _log.error("Configuration given for `%s`: %r", role, roles[role])
+                log.err(_why="`%s` does not have a factory configured." % role)
+                log.err(_why="Configuration given for `%s`: %r" % (role, roles[role]))
                 roles.pop(role)  # Remove it to prevent it from saving.
             raise MissingRoleFactoryException("Invalid config file received."
                                               " Missing Roles: %r" % missing_roles)
@@ -118,15 +111,15 @@ class RoleManagerService(NamedMultiService):
 
     factory = property(lambda self: get_factory(self.name), doc="Returns the factory object for the given role.")
 
-    def update_config(self, config):
+    def update_config(self, mapped_config):
         try:
-            mapped_config = _map_uuid_to_config(config)
             existing_uuids = set(self.namedServices.iterkeys())
             updated_uuids = set(mapped_config.iterkeys())
 
             if self.factory.instances > 0 and len(updated_uuids) > self.factory.instances:
-                _log.error("Failed to update as there are too many new uuids. %d uuids > max %d instances",
-                           len(updated_uuids), self.factory.instances)
+                log.err(_why="Failed to update as there are too many new uuids. %d uuids > max %d instances" %
+                             (len(updated_uuids), self.factory.instances))
+                log.err(_why="Recieved config: %r" % mapped_config)
                 raise InvalidConfigurationException("Failed to update as there are too many new uuids. %d uuids >"
                                                     " max %d instances" % (len(updated_uuids), self.factory.instances))
 
@@ -143,9 +136,9 @@ class RoleManagerService(NamedMultiService):
             raise InvalidConfigurationException("Role{%s} -> %r" % (self.name, e))
 
     def role_manager_shutdown(self, result, name):
-        _log.info("Completed shutdown of `%s`.", name)
-        _log.info("Result of shutdown: %r", result)
-        _log.info("Current uuids registered: %r", self.namedServices.iterkeys())
+        log.msg("Completed shutdown of `%s`." % name)
+        log.msg("Result of shutdown: %r" % result)
+        log.msg("Current uuids registered: %r" % (self.namedServices.iterkeys(), ))
 
 
 def _map_uuid_to_config(config):
@@ -161,8 +154,8 @@ def _map_uuid_to_config(config):
             uuid = c.pop("uuid")
             return {uuid: c}
         except KeyError as e:
-                raise InvalidConfigurationException("%r thrown whilst attempting to rearrange configuration:"
-                                                    " %r" % (e, config))
+            raise InvalidConfigurationException("%r thrown whilst attempting to rearrange configuration:"
+                                                " %r" % (e, config))
     else:
         d = {}
         for cfg in config:
