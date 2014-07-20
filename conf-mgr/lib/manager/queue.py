@@ -1,100 +1,137 @@
 __author__ = 'Lee Symes'
 
+import os
 import random
 import shutil
-import os
-
-from twisted.internet.defer import returnValue, inlineCallbacks
-
 from uuid import uuid1
+
+from twisted.application.internet import TimerService
+from twisted.internet.defer import inlineCallbacks
+from twisted.python import log
+
 from lib import file_helper as files
 from lib.manager import get_queue_directories
-from roles.encode import StartEncodeRequest, EncodeCompleted, EncodeFailed, _encode_job_manager
+from roles import encode
 
-class EncoderQueue(object):
+__current_directories = []
 
-    def __init__(self, config, all_stations):
-        ":type all_stations: dict[tuple[string,int], manager.StationInformation]"
+
+"""
+Should be:
+(SendCommand, command_helper, Completed, Failed)
+"""
+__queue_config = {
+    "encode": (encode.StartEncodeRequest, encode.encode_job_manager, encode.EncodeCompleted, encode.EncodeFailed)
+}
+
+
+def create_queue(all_stations, queue_name, base_config, base_dir, file_pattern, poll_length):
+    if base_dir in __current_directories:
+        raise Exception("Repeated Base Directory")
+    queue = Queue(all_stations, base_config, base_dir, poll_length, file_pattern, *__queue_config[queue_name])
+    queue.setName(queue_name)
+    __current_directories.append(base_dir)
+    log.msg("Created Queue %s", queue_name)
+    return queue
+
+
+class Queue(TimerService):
+
+    def __init__(self, all_stations, base_config, base_dir, poll_length, file_pattern,
+                 send_command, command_helper, complete_command, failed_command):
+        TimerService.__init__(self, poll_length, self.run_poll)
         self.all_stations = all_stations
-        self.config = config
-        self.folder = config["base_path"]
-        self.jobs = {}
-        print "Initilising Encoder Queue --> ", self.config
-        _encode_job_manager.responder(EncodeCompleted)(self.completed)
-        _encode_job_manager.responder(EncodeFailed)(self.failed)
-        _encode_job_manager.register()
+        self.base_config = dict(base_config)
+        self.base_folder = base_dir
+        self.file_pattern = file_pattern
+        self.send_command = send_command
+        self.complete_command = complete_command
+        self.failed_command = failed_command
+        self.command_helper = command_helper
 
-    def completed(self, uuid):
-        print "Completed " + uuid
-        self.migrate_file(uuid, "done")
-        del self.jobs[uuid]
-        return {}
+    def startService(self):
+        self.command_helper.responder(self.complete_command)(self.complete)
+        self.command_helper.responder(self.failed_command)(self.failed)
+        self.command_helper.register()
+        TimerService.startService(self)
 
-    def failed(self, uuid, failure_information):
-        print "Failed" + uuid
-        print "\t\t", failure_information
-        self.migrate_file(uuid, "fail")
-        del self.jobs[uuid]
-        return {}
+    def stopService(self):
+        self.command_helper.de_register()
+        self.command_helper.remove_responder(self.complete_command, self.complete)
+        self.command_helper.remove_responder(self.failed_command, self.failed)
+        TimerService.startService(self)
 
-    def migrate_file(self, uuid, folder_type):
-        old_file = self.jobs[uuid]
-        new_folder = get_queue_directories(self.folder, folder_type)
+    def migrate_file(self, old_file_name, new_file_name, from_folder_type, to_folder_type):  # Helper
+        old_file = os.path.join(get_queue_directories(self.base_folder, from_folder_type), old_file_name)
+        if not os.path.isfile(old_file):
+            raise Exception("Failed to locate the original file: " % old_file)
+
+        new_folder = get_queue_directories(self.base_folder, to_folder_type)
         if not os.path.isdir(new_folder):
             os.mkdir(new_folder)
 
-        new_file = os.path.join(new_folder, os.path.basename(old_file))
+        new_file = os.path.join(new_folder, new_file_name)
         shutil.move(old_file, new_file)
 
+    def migrate_file_by_uuid(self, uuid, to_folder_type):
+        wip_folder = get_queue_directories(self.base_folder, "wip")
+        for file in files.list_files_in(wip_folder, full_path=False):
+            if file.startswith(uuid):
+                return self.migrate_file(file, file, "wip", to_folder_type)
 
-    @inlineCallbacks
-    def __call__(self):
-        todo_folder = get_queue_directories(self.folder, "todo")
-        todo_files = files.list_filtered_files_in(todo_folder,
-                                                  self.config["file_pattern"])
-        wip_folder = get_queue_directories(self.folder, "wip")
-        if not os.path.isdir(wip_folder):
-            os.mkdir(wip_folder)
+        raise Exception("UUID(%s) is not found. Here are all the files in the wip folder: %r" %
+                        (uuid, files.list_files_in(wip_folder, full_path=False)))
+
+    def complete(self, uuid):
+        log.msg("Completed running %r inside %r" % (uuid, self.base_folder))
+        self.migrate_file_by_uuid(uuid, "done")
+        return {}
+
+    def failed(self, uuid, reason):
+        log.err(_why="Failed to complete %r inside %r --> Reasons: %r" % (uuid, self.base_folder, reason))
+        self.migrate_file_by_uuid(uuid, "fail")
+        return {}
+
+    def run_poll(self):
+        todo_dir = get_queue_directories(self.base_folder, "todo")
+        todo_files = files.list_filtered_files_in(todo_dir, self.file_pattern)
+
+        if not todo_files:
+            # Nothing to run so stop right here.
+            return
 
         for file in todo_files:
-            uuid = yield self.call_for_file(file)
-            print "Tried to run", file, " - The UUID returned was: ", uuid
-            if uuid:
-                wip_file = os.path.join(wip_folder, uuid + "_" + os.path.basename(file))
-                shutil.move(file, wip_file)
-                self.jobs[uuid] = wip_file
-            else:
-                print "Failed to start " + file
-                print "Will reattempt later."
-        
-        print "WIP Files:"
-        print "\n\t\t".join(files.list_files_in(wip_folder))
+            self.run_file(file)
 
     @inlineCallbacks
-    def call_for_file(self, file):
-        content = files.read_in(file)
-        # Replace this with actual codes.
-        print "Running " + file
-        print "Running " + content
-        input_files = [("Input 1", 1, 2), ("Input 2", 0, 100)]
-        output_file = "Old Name: " + file
+    def run_file(self, file):
+        if not os.path.isfile(file):
+            log.err(_why="The following file disappeared out from underneath me: %s" % file)
+            return
+        config = dict(self.base_config)
+        log.msg("Base Config: %r" % config)
+        c2 = config.update(files.load_json(file))
+        log.msg("New Config : %r" % config)
+        log.msg("Config 2   : %r" % c2)
         uuid = str(uuid1())
+        new_file = uuid + os.path.basename(file)
+
         stations = list(self.all_stations.itervalues())
+        random.shuffle(stations)
 
-        for station_info in random.sample(stations, len(stations)):
-            print "Loading up station: ", station_info
-            if station_info.station_config.roles.has_key("encode"):
-                print "Found an encoder, trying it."
-                transport = station_info.station_transport
-                res = yield transport.callRemote(StartEncodeRequest,
-                                                 job_uuid=uuid,
-                                                 input_files_and_cutoffs=input_files,
-                                                 output_file=output_file)
-                print "Responded", res
-                if res:
-                    returnValue(uuid)
-        print "Nothing found."
-        returnValue(None)
+        for station_info in stations:
+            if "encode" in station_info.station_config.roles:
+                try:
+                    res = yield station_info.station_transport.callRemote(self.send_command,
+                                                                          job_uuid=uuid,
+                                                                          job_config=config)
+                except:
+                    log.err(_why="Station%r exception whilst starting %r" % (station_info.name, file))
+                else:
+                    if res["accepted"]:
+                        log.msg("Starting to run %r on %r" % (new_file, station_info.name))
+                        self.migrate_file(file, new_file, "todo", "wip")
+                finally:
+                    pass
 
-
-
+        pass
