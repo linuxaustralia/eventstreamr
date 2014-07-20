@@ -28,19 +28,36 @@ def save_json(object, file_name, compact=False, **kwargs):
         dump(object, f, **kwargs)
 
 
+def object_to_json_string(object, compact=False, **kwargs):
+    # Sort by key name if it is not defined.
+    kwargs.setdefault("sort_keys", True)
+    if compact:
+        # Make the json really compact.
+        kwargs.setdefault('separators', (',', ':'))
+    else:
+        # By default don't use compact mode.
+        # Add a respectable indent if an indent is not defined.
+        kwargs.setdefault("indent", 4)
+        # Remove trailing spaces from lines.
+        kwargs.setdefault('separators', (',', ': '))
+    from json import dumps
+    return dumps(object, **kwargs)
+
+
 def read_in(file):
     with open(file, "r") as f:
         return f.read()
+
 
 def isfile(file):
     import os
     return os.path.isfile(file)
 
 
-def list_files_in(folder, expand_subdirectories=False):
+def list_files_in(folder, full_path=True):
     import os
     if os.path.isdir(folder):
-        files = [os.path.join(folder, match) for match in os.listdir(folder)]
+        files = [os.path.join(folder, match) if full_path else match for match in os.listdir(folder)]
         return files
     else:
         return []
