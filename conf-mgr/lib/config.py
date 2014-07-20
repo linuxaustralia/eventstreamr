@@ -126,6 +126,7 @@ class ConfigurationManagerService(MultiService):
         _configuration_commands.responder(UpdateConfiguration)(self.update_configuration)
         _configuration_commands.register()
         MultiService.startService(self)
+        self._role_manager_service.configure(self._role_config.roles)
 
     def stopService(self):
         _configuration_commands.de_register()
@@ -136,7 +137,9 @@ class ConfigurationManagerService(MultiService):
         roles = dict(roles)
         if self._role_config.roles != roles:
             self._role_manager_service.configure(roles)
-            self.update_configuration(roles)
+            self._update_callback(roles)
+        return {}
+
 
 
 
