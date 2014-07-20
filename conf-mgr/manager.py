@@ -1,30 +1,30 @@
 __author__ = 'Lee Symes'
 
+import time
 
-from twisted.internet import reactor, task
-from twisted.internet.protocol import Factory
+from twisted.application.service import Application, MultiService, Service
+from twisted.application import internet
+from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet.protocol import ServerFactory
 from twisted.protocols.amp import AMP
+from twisted.python import log
 
 from lib import general_commands
-from lib.commands import ConfiguredCommandAMP
+from lib.commands import ListenableConfiguredAMP
+from lib.config import UpdateConfiguration
+from lib.exceptions import InvalidConfigurationException
 from lib.file_helper import load_json
-from lib.monitor import FilteredFilesInFolderMonitor
+import lib.manager.queue
 from lib.manager import get_queue_directories
-from lib.manager.queue import EncoderQueue
 
-
-# Load the config as a dictionary from the JSON file.
-manager_config = load_json("manager.json")
-print manager_config
-
-#
-registered_stations = {}
+_registered_stations = {}
 """
 A Dictionary mapping between the ip/port tuple and the station's config. This will never contain empty values.
 Once a station disconnects it's information is removed from this dictionary.
 
 :type : dict[tuple[string,int],StationInformation]
 """
+
 
 class StationInformation:
     def __init__(self, station_transport, station_config=None):
@@ -39,30 +39,22 @@ class StationInformation:
     def __str__(self):
         return "%s -> %s" % (self.station_transport, self.station_config)
 
+    @property
+    def name(self):
+        return "%s(%s|%s)" % (self.station_config.hostname, self.station_config.ip, self.station_config.mac_address)
 
-class DeadStationRemoverAMP(ConfiguredCommandAMP):
-    """
-    This class monitors connection and disconnection
 
-    """
+class ManagerServerFactory(ServerFactory):
+    maxDelay = 30
+    initialDelay = 5
 
-    def startReceivingBoxes(self, boxSender):
-        """
-        self.transport.client -> tuple(ip_address, port)
-        """
-        print boxSender
-        registered_stations[self.transport.client] = StationInformation(boxSender)
-        ConfiguredCommandAMP.startReceivingBoxes(self, boxSender)
+    def __init__(self):
+        pass
 
-    def sendBox(self, box):
-        print "Sending:  ", box
-        super(DeadStationRemoverAMP, self).sendBox(box)
+    def protocol(self):
+        return ListenableConfiguredAMP(start=self.connected, stop=self.disconnected)
 
-    def ampBoxReceived(self, box):
-        print "Received: ", box
-        super(DeadStationRemoverAMP, self).ampBoxReceived(box)
-
-    def stopReceivingBoxes(self, reason):
+    def disconnected(self, amp, reason):
         """
         No further boxes will be received on this connection.
 
@@ -70,79 +62,115 @@ class DeadStationRemoverAMP(ConfiguredCommandAMP):
         """
         # The transport.client will give a unique tuple which we can link up to a registered station and then remove
         # because it's disconnecting.
-        client = self.transport.client
-        print "Disconnecting from     ", client
-        print "Discarded Information: ", registered_stations.pop(client, "NO INFORMATION STORED")
-        registered_stations.pop(client, {})
-        ConfiguredCommandAMP.stopReceivingBoxes(self, reason)
+        client = amp.transport.client
+        log.msg("Disconnecting from     %r" % (client, ))
+        log.msg("Discarded Information: %r" % (_registered_stations.pop(client, "NO INFORMATION STORED"), ))
+        _registered_stations.pop(amp.transport.client, {})
+
+    def connected(self, amp, box_sender):
+        """
+        self.transport.client -> tuple(ip_address, port)
+        """
+        log.msg("Connected to %r -> %r" % (amp.transport.client, box_sender))
+        _registered_stations[amp.transport.client] = StationInformation(box_sender)
 
 
-@general_commands.manager_commands.responder(general_commands.RegisterStationCommand)
-def register_station(config, transport):
-    client = transport.client
-    if client not in registered_stations:
-        registered_stations[client] = StationInformation(transport)
-    info = registered_stations[client]
+class RegisterStationWithManagerService(Service):
 
-    info.station_config = config
+    def __init__(self):
+        self.setName("Register Station With Manager Service")
 
-    role_config = {"encode":
-                       {"uuid": "encode",
-                        "command": "echo"
-                       }}
+    def startService(self):
+        general_commands.manager_commands.responder(general_commands.RegisterStationCommand)(self.register_station)
+        general_commands.manager_commands.register()
 
-    info.station_config.roles = role_config
+    def stopService(self):
+        general_commands.manager_commands.de_register()
+        general_commands.manager_commands.remove_responder(general_commands.RegisterStationCommand,
+                                                           self.register_station)
+        pass
 
-    return {"config": role_config}
+    @inlineCallbacks
+    def register_station(self, config, transport, box_sender):
+        client = transport.client
+        if client not in _registered_stations:
+            _registered_stations[client] = StationInformation(transport)
+        info = _registered_stations[client]
+
+        info.station_config = config
+
+        # TODO load config from disk/database.
+        __ = """
+            role_config = {"uuid": {
+                                    "role": "encode",
+                                    "timestamp": 1024
+                                    ...
+                                   }
+                           "uuid": {
+                                    "role": "dvswitch",
+                                    "timestamp": 1025
+                                    ...
+                                   }
+                          }
+
+        """
+        role_config = {
+            "encode": {
+                "encode-uuid": {
+                    "script": "scripts/run_encode.py",
+                    "timestamp": int(time.time() * 1000)}}}
+
+        try:
+            yield box_sender.callRemote(UpdateConfiguration, roles=role_config)
+        except InvalidConfigurationException as e:
+            log.err(_why="Failed to load config.")
+
+        info.station_config.roles = role_config
+
+        returnValue({})
 
 
-def configure_encoder_fs_watch():
-    if "encode" not in manager_config["queues"]:
-        print "Inside check failed. ", manager_config["queues"].iterkeys()
-        # No configuration for encoding.
-        return
-    encode_config = manager_config["queues"]["encode"]
-    base_path = encode_config["base_path"]
-    todo_path = get_queue_directories(base_path, "todo")
-    encode_queue = EncoderQueue(encode_config, registered_stations)
+class QueueManagerStation(MultiService):
 
-    l = task.LoopingCall(FilteredFilesInFolderMonitor(todo_path,
-                                                      encode_config["file_pattern"],
-                                                      encode_queue))
-    l.start(10.0, now=True) # Call every minute. Wait a minute before starting.
+    def __init__(self, queue_config):
+        """
 
+        :param queue_config:
+        :type queue_config: dict(string, dict(string, object))
+        :return:
+        :rtype:
+        """
+        print queue_config
+        MultiService.__init__(self)
+        for queue_name, config in queue_config.iteritems():
+            base_path = config["base_path"]
+            poll_length = config.get("poll_length", 30)
+            file_pattern = config.get("file_pattern", "*")
+            station_config = config.get("station_config", {})
+            queue = lib.manager.queue.create_queue(_registered_stations, queue_name, station_config,
+                                                   base_path, file_pattern, poll_length)
+            print "Started %r with %r: %r" % (queue_name, config, queue)
+            queue.setServiceParent(self)
 
+static_config = load_json("manager.json")
 
+service_wrapper = MultiService()
 
+server = internet.TCPServer(static_config["listen_port"], ManagerServerFactory())
+server.setServiceParent(service_wrapper)
 
+queue_manager = QueueManagerStation(static_config.get("queues", {}))
+queue_manager.setServiceParent(service_wrapper)
 
+station_register = RegisterStationWithManagerService()
+station_register.setServiceParent(service_wrapper)
 
-
-
-
-
-
-def create_and_configure_AMP():
-    print "Configure"
-    amp = DeadStationRemoverAMP()
-    return amp
-
-
-def main():
-    general_commands.manager_commands.register()
-    # FROM: http://twistedmatrix.com/documents/current/core/examples/ampserver.py
-
-    pf = Factory()
-    pf.noisy = True
-    pf.protocol = create_and_configure_AMP
-
-    configure_encoder_fs_watch()
-
-    reactor.listenTCP(manager_config["listen_port"], pf)
-    reactor.run()
+application = Application("EventStreamr Station")
+service_wrapper.setServiceParent(application)
 
 if __name__ == "__main__":
-    main()
+    print "Please run this file using the following command - It makes life easier."
+    print "\ttwistd --pidfile manager.pid --nodaemon --python manager.py"
 
 
 
