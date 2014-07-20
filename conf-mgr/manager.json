@@ -2,15 +2,13 @@
     "listen_port": 5002,
     "queues": {
         "encode": {
-            "server_name": "storage.local",
+            "station_config": {
+                "server_name": "storage.local"
+            },
             "__base_path": "/home/av/eventstreamr/test/queue/encode/",
             "base_path": "/Users/lee/NetBeansProjects/eventstreamr/queue/encode/",
-            "file_pattern": "*.json"
-        },
-        "upload": {
-            "server_name": "storage.local",
-            "base_path": "/home/av/eventstreamr/test/queue/upload/",
-            "file_pattern": "*.json"
+            "file_pattern": "*.json",
+            "poll_length": 2
         }
     }
 }

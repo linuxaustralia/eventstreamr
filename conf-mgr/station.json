@@ -3,6 +3,6 @@
     "manager_port": 5002,
     "dynamic_config": "station_config.json",
     "blocked_roles": [
-        "mixer", "// Definately not a role this will take ever ever ever.(E.G. Server taking mixer)."
+        "mixer", "// Definitely not a role this will take ever ever ever.(E.G. Server taking mixer)."
     ]
 }

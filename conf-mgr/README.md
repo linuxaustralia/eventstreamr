@@ -21,6 +21,33 @@ To run the manager, simply execute `python -m manager`
 To run the station, simply execute `twistd --nodaemon --python station.py` or for daemon mode: `twistd --python station.py`.
 For more information on daemon mode and `twistd`, see the [Twisted Documentation](http://twistedmatrix.com/documents/current/core/howto/basics.html)
 
+Configuration Files
+-------------------
+
+###manager.json
+
+###station.json
+
+###station_config.json
+
+These are laid out as mappings from a role to a uuid to the configuration. as:
+
+    //  <Role>      <UUID>          <Config Options>
+    {
+        "encode": {
+                    "uuid - 1": {
+                                    "timestamp": 100,
+                                    "script": "hello_world.py"
+                    },
+        "upload": {
+                    "uuid - 1": {
+                                    "timestamp": 100,
+                                    "script": "upload_to_youtube.py"
+                    }
+        }
+    }
+
+
 Manager/Station Communication
 -----------------------------
 
