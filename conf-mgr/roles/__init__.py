@@ -6,18 +6,16 @@ This file defines the storage for the roles.
 """
 
 import pkgutil as _pkgutil
-import logging
 
-from twisted.application.service import Service
+from twisted.application.service import MultiService
+from twisted.python import log
 
 __factories__ = {}
-
-_log = logging.getLogger("roles.__init__")
 
 
 def register_factory(name, factory):
     """Register the given factory as the given name. The factory object should be an initialised RoleFactory."""
-    _log.debug("Registering %s with the given factory: %r", name, factory)
+    log.msg("Registering %s with the given factory: %r" % (name, factory))
     __factories__[name] = factory
 
 
@@ -73,13 +71,13 @@ class RoleFactory(object):
         return None
 
 
-class Role(Service, object):
+class Role(MultiService, object):
     """
     This class is safe to be implemented with MultiService as it provides no implementations of Service methods.
     """
 
     def __init__(self):
-        Service.__init__(self)
+        MultiService.__init__(self)
 
     def update(self, config):
         pass
@@ -88,10 +86,10 @@ class Role(Service, object):
 loaded = []
 for importer, module_name, is_pkg in _pkgutil.iter_modules(__path__):
     if not is_pkg and importer is not None:
-        _log.info("Loading `%s` module ...", module_name)
+        log.msg("Loading `%s` module ..." % module_name)
         __import__("%s.%s" % (__name__, module_name))
-        _log.info("Loaded `%s` module.", module_name)
+        log.msg("Loaded `%s` module." % module_name)
         loaded.append(module_name)
 
-_log.info("Loaded the following modules: %r", loaded)
+log.msg("Loaded the following modules: %r" % loaded)
 del loaded

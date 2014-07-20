@@ -1,6 +1,5 @@
 __author__ = 'Lee Symes'
-
-"""
+__doc__ = """
 This file contains utilities for this computer's information including the current MAC address, IP address and computer
  name.
 
