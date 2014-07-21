@@ -27,6 +27,7 @@ I'm going to layout the posting of logs like so:
 
 The benefit with responding with `written` is that the station guarantees that the manager has the logs prior to removing them; Whilst this could cause duplication of some lines in the log files contained on the manager, the manager would not be missing any log lines.
 
+Side Note: Should write out to the station's log file when the log entry is received not when it is confirmed. This will make the logs on the station the authoritative logs with the ones on the manager being a very close second(hopefully just with duplicated lines(not missing)).
 
 Things To Do
 ------------
