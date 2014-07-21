@@ -40,7 +40,17 @@ Things To Do
 
  - Figure out how to do no.2 whilst keeping the `log_location` information.
 
-    - **Cunning Plan:** Change the sent information to be a list of log entries with a tuple containing `(log_location, log_data, update_time)`; or more fully:
+    - **Cunning Plan:** Change the sent information to be a list of log entries with a tuple containing 
+      
+      ```
+      (log_location, log_data, update_time)
+      ```
+      
+      Or more fully:
       **Sent Information:**
-      `    logs (Object) -> [(["encode", "general"], "<<Raw Log Entry Here>>", <<Milliseconds since epoch>>), ...]`
+      
+      ```
+      logs (Object) -> [(["encode", "general"], "<<Raw Log Entry Here>>", <<Millis>>), ...]
+      ```
+      
       Once the station receives the response, it can just clear or delete the file and switch over to the other one. This could mean that this simply runs as a polling job where it switches the log files and sends them every minute. And then add an extra handle so if a major error occurs the logs are sent.
