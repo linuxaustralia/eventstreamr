@@ -54,6 +54,20 @@ def isfile(file):
     return os.path.isfile(file)
 
 
+def exists(file):
+    import os
+    return os.path.exists(file)
+
+
+def delete(file):
+    import os
+    return os.remove(file)
+
+def join(path, *paths):
+    import os
+    return os.path.join(path, *paths)
+
+
 def list_files_in(folder, full_path=True):
     import os
     if os.path.isdir(folder):
