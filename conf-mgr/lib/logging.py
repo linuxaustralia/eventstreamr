@@ -50,6 +50,15 @@ class Logger(LogPublisher):
         kw["isDebug"] = True
         self.msg(*message, **kw)
 
+    def cmd_output_stderr(self, output):
+        self.cmd_output("ERR", output)
+
+    def cmd_output_stdout(self, output):
+        self.cmd_output("OUT", output)
+
+    def cmd_output(self, prefix, output):
+        self.msg("\n".join([prefix + "| " + line for line in output.splitlines()]))
+
     def msg(self, *message, **kw):
         kw.setdefault("location", self.location)
         kw.setdefault("transmit", self.transmit)

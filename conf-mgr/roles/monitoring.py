@@ -24,7 +24,7 @@ class MonitoringRole(PollingCommandServiceMixin, Role):
         Role.__init__(self)
 
     def err_received(self, data):
-        log.error(data)
+        log.cmd_output_stderr(data)
 
     def command(self):
         return ['dvsink-command', 

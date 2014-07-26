@@ -62,7 +62,7 @@ class PollingCommandServiceMixin(PollingServiceMixin):
 
     def do_poll(self):
         command = [str(c) for c in self.command()]
-        reactor.spawnProcess(self._ProcessProtocol(), command[0], command)
+        reactor.spawnProcess(PollingCommandServiceMixin._ProcessProtocol(self), command[0], command)
 
     def startService(self):
         self.call_later = reactor.callLater(self.poll_length, self.do_poll)
