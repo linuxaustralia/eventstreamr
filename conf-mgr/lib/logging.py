@@ -17,12 +17,16 @@ imported as: `from lib.logging import log` without any code being changed.
 from time import strftime, gmtime, time
 import string
 import random
+import sys
+
+_stdout = sys.stdout
+_stderr = sys.stderr
 
 from twisted.application.service import Service
 from twisted.internet import reactor
 from twisted.internet.defer import DeferredList, maybeDeferred, inlineCallbacks
 from twisted.python import failure
-from twisted.python.log import LogPublisher, textFromEventDict, defaultObserver
+from twisted.python.log import LogPublisher, textFromEventDict
 from twisted.python.logfile import LogFile
 
 from lib.computer_info import is_production
@@ -45,7 +49,6 @@ class Logger(LogPublisher):
         self.location = location
         self.transmit = transmit
         LogPublisher.__init__(self)
-        self.addObserver(defaultObserver._emit)
 
     def debug(self, *message, **kw):
         kw["isDebug"] = True
@@ -233,12 +236,7 @@ class LogObserver(object):
     def emmit(self, event):
         if event.get("isDebug", False) and is_production():
             return  # Don't log debug messages in production.
-        location = event.get("location", [])
-        if not location:
-            location = ["general"]
-        log_time = event.get("time", time())
-        log_time_str = strftime("%Y-%m-%d %H:%M:%S:%f", gmtime(log_time))
-        entry_text = textFromEventDict(event)
+        location, log_time, log_time_str, entry_text = self.parse_from(event)
         folder, name = build_file(self.folder, location, self.extension)
         try:
             log = LogFile(name, folder)
@@ -248,6 +246,34 @@ class LogObserver(object):
         finally:
             if event.get("transmit", False) and not event.get("isDebug", False):
                 self.service.write_entry(location, log_time, entry_text)
+
+    def parse_from(self, event):
+        location = event.get("location", [])
+        if not location:
+            location = ["general"]
+        log_time = event.get("time", time())
+        log_time_str = strftime("%Y-%m-%d %H:%M:%S:%f", gmtime(log_time))
+        entry_text = textFromEventDict(event)
+        return location, log_time, log_time_str, entry_text
+
+    def print_to_sys(self, event):
+        location, log_time, log_time_str, entry_text = self.parse_from(event)
+
+        out = _stdout
+        prefix = "MSG"
+        if event.get("isError", False):
+            out = _stderr
+            prefix = "ERR"
+        if event.get("isDebug", False):
+            prefix = "DBG"
+
+        lines = ["%s %s -> %s\n" % (prefix, log_time_str, ">".join(location))] + \
+                ["\t|%s\t%s\n" % (prefix, l) for l in entry_text.splitlines()]
+
+        out.writelines(
+            lines
+        )
+        out.flush()
 
 
 def build_file(folder, paths, extension):
@@ -280,6 +306,8 @@ def check_path(path):
 def emmit(event):
     observer.emmit(event)
 
+def emmit_to_term(event):
+    observer.print_to_sys(event)
 
 def getLogger(location, transmit_=None):
     if transmit_ is None:
@@ -287,6 +315,7 @@ def getLogger(location, transmit_=None):
     loc = [str(e) for e in location]
     l = Logger(location=loc, transmit=transmit_)
     l.addObserver(emmit)
+    l.addObserver(emmit_to_term)
     return l
 
 # Allow global configuration of transmission.
