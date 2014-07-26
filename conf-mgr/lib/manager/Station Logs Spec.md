@@ -15,10 +15,9 @@ I'm going to layout the posting of logs like so:
 **Communication:** Station -> Manager
 **Sent Information:**
 
-    log_location (Object) -> ["encode", "general"]
-            # This would output to the `logs/0123456789AB/encode/general.log`
-    log_data (BigUnicode) -> "<<Raw Log Output Here>>"
-    update_time (Integer) -> <<Milliseconds since epoch>>
+
+    logs (Object) -> [(<<Log Location>>, <<Raw Log Entry Here>>, <<Log Time>>), ...]
+
 
 **Received Information:**
 
@@ -26,6 +25,42 @@ I'm going to layout the posting of logs like so:
             # Just to be sure; This is so that the station can now move that information into a `sent` log file.
 
 The benefit with responding with `written` is that the station guarantees that the manager has the logs prior to removing them; Whilst this could cause duplication of some lines in the log files contained on the manager, the manager would not be missing any log lines.
+
+Logging Timeline
+----------------
+
+ 1. A component posts a log message using the `lib.logging`.
+ 2. The configured log observer writes the message to the file specified in `location`(either during logger construction or when it is logged).
+ 3. Now if `transmit` is not true(i.e. false or missing) the observer returns. Otherwise passes the message onto the transmission service.
+ 4. The transmission service now saves the log information into a temporary 'queue' file. This file is named as the date/time is it created.
+ 5. The transmission service now schedules a log transmission in a random number of seconds(between 2 and 10 seconds). This completes the actions that block the original log. For the transmission see below.
+ 
+Logging Transmission Timeline
+-----------------------------
+
+This is likely called after a delay when a message is sent to the logger. It can also be called when the station starts up and detects unsent logs or when the station is shutting down.
+
+ 1. The queue is 'rotated'(This is blocking so will not allow any logs through in the process):
+    1. The current queue file is closed.
+    2. The new queue file is created and opened for reading. 
+    3. This file is now set to be the current queue
+ 2. The old queue is now read completely and converted(see below for the queue file format) ready for sending.
+ 3. The log entries are sent to the manager.
+ 4. Once the manager responds with a success, the old queue file is deleted.
+
+Logging Queue File
+------------------
+
+The file is laid out as follows:
+```
+<<Log time in millis>>:<<Log Location(as a '|' seperated list)>>:<<Log message(possibly multi-line)>>\0...
+```
+Where `\0` is the null character. There is no newline between each `\0`. This allows the `\0` to be a seperator for each log message.
+
+
+
+
+
 
 Side Note: Should write out to the station's log file when the log entry is received not when it is confirmed. This will make the logs on the station the authoritative logs with the ones on the manager being a very close second(hopefully just with duplicated lines(not missing)).
 
@@ -51,7 +86,7 @@ Things To Do
       **Sent Information:**
       
       ```
-      logs (Object) -> [(["encode", "general"], "<<Raw Log Entry Here>>", <<Millis>>), ...]
+      logs (Object) -> [(<<Millis>>, [<<Log Location>>], "<<Raw Log Entry Here>>"), ...]
       ```
       
       Once the station receives the response, it can just clear or delete the file and switch over to the other one. This could mean that this simply runs as a polling job where it switches the log files and sends them every minute. And then add an extra handle so if a major error occurs the logs are sent.
