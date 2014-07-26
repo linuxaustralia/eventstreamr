@@ -271,12 +271,16 @@ def emmit(event):
     observer.emmit(event)
 
 
-def getLogger(location, transmit=True):
+def getLogger(location, transmit_=None):
+    if transmit_ is None:
+        transmit_ = transmit
     assert isinstance(location, tuple)
-    l = Logger(location=location, transmit=transmit)
+    l = Logger(location=location, transmit=transmit_)
     l.addObserver(emmit)
     return l
 
+# Allow global configuration of transmission.
+transmit = True
 
 # Default - Don't transmit it.
 log = Logger(transmit=False)
