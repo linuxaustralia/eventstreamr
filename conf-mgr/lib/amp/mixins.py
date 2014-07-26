@@ -65,7 +65,7 @@ class PollingCommandServiceMixin(PollingServiceMixin):
         reactor.spawnProcess(self._ProcessProtocol(), command[0], command)
 
     def startService(self):
-        self.call_later = reactor.callLater(self.poll_length(), self.do_poll)
+        self.call_later = reactor.callLater(self.poll_length, self.do_poll)
 
     def connection_made(self, transport):
         pass
@@ -80,9 +80,6 @@ class PollingCommandServiceMixin(PollingServiceMixin):
         pass
 
     def command(self):
-        pass
-
-    def poll_length(self):
         pass
 
     class _ProcessProtocol(protocol.ProcessProtocol):
@@ -110,6 +107,6 @@ class PollingCommandServiceMixin(PollingServiceMixin):
             self.command_service.err_received(data)
 
         def processEnded(self, reason):
-            self.command_service.call_later = reactor.callLater(self.command_service.poll_length(),
+            self.command_service.call_later = reactor.callLater(self.command_service.poll_length,
                                                                 self.command_service.do_poll)
             self.command_service.process_ended(reason)
