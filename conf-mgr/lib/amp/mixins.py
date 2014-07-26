@@ -52,7 +52,7 @@ class PollingServiceMixin(object):
         self.call_later = reactor.callLater(self.poll_length(), __do_poll)
 
     def stopService(self):
-        if self.call_later:
+        if self.call_later and self.call_later.active():
             self.call_later.cancel()
 
 
@@ -64,7 +64,7 @@ class PollingCommandServiceMixin(PollingServiceMixin):
         PollingServiceMixin.__init__(poll_length)
 
     def do_poll(self):
-        command = self.command()
+        command = [str(c) for c in self.command()]
         reactor.spawnProcess(self._ProcessProtocol(), command[0], command)
 
     def startService(self):
