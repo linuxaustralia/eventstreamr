@@ -20,7 +20,7 @@ class MonitoringRole(PollingCommandServiceMixin, Role):
 
     def command(self):
         self.log.debug("Getting command to output ")
-        return ['dvsink-command', 
+        c = ['dvsink-command',
                 '-h', self.config.get('src_ip'), 
                 '-p', self.config.get('src_port'),
                 '--',
@@ -28,6 +28,8 @@ class MonitoringRole(PollingCommandServiceMixin, Role):
                 '-h', self.config.get('dst_ip'),
                 '-p', self.config.get('dst_port'),
                 '-']
+        self.log.debug("%r" % c)
+        return c
 
     def update(self, config):
         self.log.debug("%r" % config)

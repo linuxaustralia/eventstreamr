@@ -236,11 +236,11 @@ class LogObserver(object):
     def emmit(self, event):
         if event.get("isDebug", False) and is_production():
             return  # Don't log debug messages in production.
-        location, log_time, log_time_str, entry_text = self.parse_from(event)
+        location, prefix, log_time, log_time_str, entry_text = self.parse_from(event)
         folder, name = build_file(self.folder, location, self.extension)
         try:
             log = LogFile(name, folder)
-            log.write(">%s\n\t%s\n" % (log_time_str, entry_text.replace("\n", "\n\t\t")))
+            log.write("%s %s\n\t%s\n" % (prefix, log_time_str, entry_text.replace("\n", "\n\t\t")))
             log.flush()
             log.close()
         finally:
@@ -252,20 +252,21 @@ class LogObserver(object):
         if not location:
             location = ["general"]
         log_time = event.get("time", time())
-        log_time_str = strftime("%Y-%m-%d %H:%M:%S:%f", gmtime(log_time))
+        log_time_str = strftime("%Y-%m-%d %H:%M:%S", gmtime(log_time))
         entry_text = textFromEventDict(event)
-        return location, log_time, log_time_str, entry_text
-
-    def print_to_sys(self, event):
-        location, log_time, log_time_str, entry_text = self.parse_from(event)
-
-        out = _stdout
         prefix = "MSG"
         if event.get("isError", False):
-            out = _stderr
             prefix = "ERR"
         if event.get("isDebug", False):
             prefix = "DBG"
+        return location, prefix, log_time, log_time_str, entry_text
+
+    def print_to_sys(self, event):
+        location, prefix, log_time, log_time_str, entry_text = self.parse_from(event)
+
+        out = _stdout
+        if event.get("isError", False):
+            out = _stderr
 
         lines = ["%s %s -> %s\n" % (prefix, log_time_str, ">".join(location))] + \
                 ["\t|%s\t%s\n" % (prefix, l) for l in entry_text.splitlines()]
