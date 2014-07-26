@@ -36,20 +36,17 @@ class PollingServiceMixin(object):
 
     def __init__(self, poll_length=None):
         if poll_length is not None:
-            self.poll_length = lambda self: poll_length
+            self.poll_length = poll_length
         self.call_later = None
 
     def do_poll(self):
         pass
 
-    def poll_length(self):
-        pass
-
     def startService(self):
         def __do_poll():
-            self.call_later = reactor.callLater(self.poll_length(), __do_poll)
+            self.call_later = reactor.callLater(self.poll_length, __do_poll)
             self.do_poll()
-        self.call_later = reactor.callLater(self.poll_length(), __do_poll)
+        self.call_later = reactor.callLater(self.poll_length, __do_poll)
 
     def stopService(self):
         if self.call_later and self.call_later.active():
@@ -59,8 +56,8 @@ class PollingServiceMixin(object):
 class PollingCommandServiceMixin(PollingServiceMixin):
 
     def __init__(self, poll_length=None, command=None):
-        if poll_length is not None:
-            self.command = lambda self: command
+        if command is not None:
+            self.command = lambda: command
         PollingServiceMixin.__init__(self, poll_length)
 
     def do_poll(self):
