@@ -4,5 +4,13 @@
             "script": "scripts/run_encode.py",
             "timestamp": 1406351136342
         }
+    },
+    "monitoring": {
+        "B1": {
+            "src_ip": "10.4.4.102",
+            "src_port": "1234",
+            "dst_ip": "10.4.4.117",
+            "dst_port": "1234"
+        }
     }
 }
