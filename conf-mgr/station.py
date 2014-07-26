@@ -48,8 +48,8 @@ def register_station(connection):
     # Station still sends existing config on the 'hello' command.
     try:
         yield connection.callRemote(RegisterStationCommand, config=role_config)
-    except Exception as e:
-        log.err(_why="Failed to call remote manager to say hello")
+    except:
+        log.error("Failed to call remote manager to say hello")
 
     log.msg("New Config:" + repr(role_config))
 

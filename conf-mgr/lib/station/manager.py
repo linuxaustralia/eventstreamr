@@ -131,7 +131,7 @@ class RoleManagerService(NamedMultiService):
                 else:
                     service = self.factory.makeService(uuid, mapped_config[uuid])
                     service.setName(uuid)
-                    self.addService(service)
+                    service.setServiceParent(self)
         except InvalidConfigurationException as e:
             raise InvalidConfigurationException("Role{%s} -> %r" % (self.name, e))
 

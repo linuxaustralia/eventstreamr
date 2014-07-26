@@ -9,7 +9,7 @@ class MonitoringRole(PollingCommandServiceMixin, Role):
     def __init__(self, uuid):
         self.log = getLogger(("monitoring", uuid))
         self.config = {}
-        PollingCommandServiceMixin.__init__(self, 0, self.command())
+        PollingCommandServiceMixin.__init__(self, 0)
         Role.__init__(self)
 
     def err_received(self, data):
@@ -18,21 +18,23 @@ class MonitoringRole(PollingCommandServiceMixin, Role):
     def out_received(self, data):
         self.log.cmd_output_stdout(data)
 
+    def startService(self):
+        PollingCommandServiceMixin.startService(self)
+        Role.startService(self)
+
     def command(self):
-        self.log.debug("Getting command to output ")
-        c = ['dvsink-command',
-                '-h', self.config.get('src_ip'), 
+        if "src_ip" not in self.config:
+            raise Exception("Too Early")
+        return ['dvsink-command',
+                '-h', self.config.get('src_ip'),
                 '-p', self.config.get('src_port'),
                 '--',
                 'dvsource-file',
                 '-h', self.config.get('dst_ip'),
                 '-p', self.config.get('dst_port'),
                 '-']
-        self.log.debug("%r" % c)
-        return c
 
     def update(self, config):
-        self.log.debug("%r" % config)
         self.config = config
 
 

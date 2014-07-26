@@ -13,7 +13,7 @@ from lib.logging import getLogger
 
 __factories__ = {}
 
-log = getLogger("roles-init")
+log = getLogger(["roles-init"])
 
 
 def register_factory(name, factory):
@@ -83,7 +83,7 @@ class Role(MultiService, object):
         MultiService.__init__(self)
 
     def startService(self):
-        print "Starting Role"
+        print "Starting Role %s" % self.name
         self.start()
         MultiService.startService(self)
 
