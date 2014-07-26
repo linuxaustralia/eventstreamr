@@ -6,7 +6,7 @@ from itertools import count as _count
 
 from twisted.protocols.amp import Argument as _Argument
 # Allow items to just import this file and have access to all of the argument types.
-from twisted.protocols.amp import Integer, Float, Boolean, Unicode, Path, Command
+from twisted.protocols.amp import Integer, Float, Boolean, Unicode, Path, Command, String
 
 CHUNK_MAX = 0xffff
 
@@ -102,4 +102,4 @@ class Object(BigUnicode):
         return BigUnicode.from_value(self, _pickle.dumps(value))
 
 __all__ = ["BigString", "BigUnicode", "Boolean", "BoxSender", "Command", "Float", "Integer", "Object", "Path",
-           "Transport", "Unicode"]
+           "String", "Transport", "Unicode"]
