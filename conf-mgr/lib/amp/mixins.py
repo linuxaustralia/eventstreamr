@@ -61,7 +61,7 @@ class PollingCommandServiceMixin(PollingServiceMixin):
     def __init__(self, poll_length=None, command=None):
         if poll_length is not None:
             self.command = lambda self: command
-        PollingServiceMixin.__init__(poll_length)
+        PollingServiceMixin.__init__(self, poll_length)
 
     def do_poll(self):
         command = [str(c) for c in self.command()]
