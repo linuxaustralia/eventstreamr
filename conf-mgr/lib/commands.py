@@ -94,13 +94,16 @@ class _ConfigurationHelper:
 
     ##### Configuring Responder Functions #####
 
-    def responder(self, cls):
+    def responder(self, cls, func=None):
         def decorator(fn):
             self._other_cmds.add((cls, fn))
             if __role_locators__.get(self.role_name, None):
                 # Already registered so update the information.
                 self.register()
-        return decorator
+        if func is None:
+            return decorator
+        else:
+            return decorator(func)
 
     def remove_responder(self, cls=None, fn=None):
         if not isinstance(cls, Command):  # Support people being lazy.
