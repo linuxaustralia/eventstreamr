@@ -8,9 +8,12 @@ This file defines the storage for the roles.
 import pkgutil as _pkgutil
 
 from twisted.application.service import MultiService
-from twisted.python import log
+
+from lib.logging import getLogger
 
 __factories__ = {}
+
+log = getLogger("roles-init")
 
 
 def register_factory(name, factory):
@@ -47,7 +50,7 @@ class RoleFactory(object):
     def __init__(self):
         pass
 
-    def makeService(self, given_config):
+    def makeService(self, uuid, given_config):
         """
         Start a new implementation of the role using given_config to configure it.
         This method should create a new role with the given configuration. If this method is unable to make a role
@@ -56,12 +59,12 @@ class RoleFactory(object):
         This method's default operation is to create an instance using `build` and then configure it using
         `Role.update`.
         """
-        instance = self.build()
+        instance = self.build(uuid)
         instance.update(given_config)
 
         return instance
 
-    def build(self):
+    def build(self, uuid):
         """
         Implement this method to return a new role. The role will be configured using `Role.update`. If more advanced
         configuration is needed, then implement `makeService`

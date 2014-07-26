@@ -1,2 +1,5 @@
 *.pyc
 encoding/test
+conf-mgr/logs-temp
+conf-mgr/logs
+conf-mgr/station-logs

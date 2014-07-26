@@ -13,8 +13,6 @@ from roles import RoleFactory, Role, register_factory
 from lib.computer_info import load_averages, num_cores
 from lib.logging import getLogger
 
-log = getLogger(("encode", "general"))
-
 _encode_job_station = configuration_helper("encode jobs(On Station)")
 encode_job_manager = configuration_helper("encode jobs(On Manager)")
 
@@ -42,13 +40,14 @@ class EncodeFailed(amp.Command):
 
 class EncodeRole(CommandRegistrationServiceMixin, Role):
 
-    def __init__(self):
+    def __init__(self, uuid):
+        self.log = getLogger(("encode", uuid))
         Role.__init__(self)
         CommandRegistrationServiceMixin.__init__(self,
                                                  _encode_job_station,
                                                  (StartEncodeRequest, self.start_encode))
         self.config = {}
-        log.msg("EncodeRole 123")
+        self.log.msg("EncodeRole 123")
 
     def start_encode(self, sender, job_uuid, job_config):
         if not self.can_encode():
@@ -63,13 +62,13 @@ class EncodeRole(CommandRegistrationServiceMixin, Role):
                 # Between 7am and 7pm on a mixer so we won't do any encoding.
                 return False
         if load_averages()[1] > 0.8: # Load for the past 5 minutes averaging more than 80%
-            log.msg("5 Minute Average Load too damn high")
+            self.log.msg("5 Minute Average Load too damn high")
             return False
         if load_averages()[0] > 0.9: # Load for the past 1 minute averaging more than 90%.
-            log.msg("1 Minute Average Load too damn high")
+            self.log.msg("1 Minute Average Load too damn high")
             return False
         if len(self.services) >= num_cores(): # One job per core.
-            log.msg("I've got a lot on my plate right now. I only have so many CPUs.")
+            self.log.msg("I've got a lot on my plate right now. I only have so many CPUs.")
             return False
         return True
 
@@ -89,8 +88,8 @@ class EncodeRoleFactory(RoleFactory):
     def __init__(self):
         super(EncodeRoleFactory, self).__init__()
 
-    def build(self):
-        return EncodeRole()
+    def build(self, uuid):
+        return EncodeRole(uuid)
 
 
 encode_factory = EncodeRoleFactory()

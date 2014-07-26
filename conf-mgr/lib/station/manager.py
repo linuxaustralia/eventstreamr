@@ -129,7 +129,7 @@ class RoleManagerService(NamedMultiService):
                 if uuid in existing_uuids:
                     self.getServiceNamed(uuid).update(mapped_config[uuid])
                 else:
-                    service = self.factory.makeService(mapped_config[uuid])
+                    service = self.factory.makeService(uuid, mapped_config[uuid])
                     service.setName(uuid)
                     self.addService(service)
         except InvalidConfigurationException as e:

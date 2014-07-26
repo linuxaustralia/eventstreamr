@@ -7,3 +7,7 @@ Just add `#!/usr/bin/python` at the top of the file then to run simply:
 
 Where the `cwd` is the current directory of the current python process.
 This will also work with `.sh` files that also have the `#!` at the top.
+
+
+http://krondo.com/wp-content/uploads/2009/08/twisted-intro.html#post-2345
+

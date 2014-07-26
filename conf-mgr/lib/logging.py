@@ -22,7 +22,7 @@ from twisted.application.service import Service
 from twisted.internet import reactor
 from twisted.internet.defer import DeferredList, maybeDeferred, inlineCallbacks
 from twisted.python import failure
-from twisted.python.log import LogPublisher, textFromEventDict
+from twisted.python.log import LogPublisher, textFromEventDict, defaultObserver
 from twisted.python.logfile import LogFile
 
 from lib.computer_info import is_production
@@ -45,6 +45,7 @@ class Logger(LogPublisher):
         self.location = location
         self.transmit = transmit
         LogPublisher.__init__(self)
+        self.addObserver(defaultObserver._emit)
 
     def debug(self, *message, **kw):
         kw["isDebug"] = True
@@ -283,8 +284,8 @@ def emmit(event):
 def getLogger(location, transmit_=None):
     if transmit_ is None:
         transmit_ = transmit
-    assert isinstance(location, tuple)
-    l = Logger(location=location, transmit=transmit_)
+    loc = [str(e) for e in location]
+    l = Logger(location=loc, transmit=transmit_)
     l.addObserver(emmit)
     return l
 
