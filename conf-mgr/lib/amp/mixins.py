@@ -4,7 +4,6 @@ from twisted.internet import protocol, reactor
 
 
 class CommandRegistrationServiceMixin(object):
-    float
 
     def __init__(self, helper, *command_responder_pairs):
         """
@@ -80,10 +79,13 @@ class PollingCommandServiceMixin(PollingServiceMixin):
     def err_received(self, data):
         pass
 
+    def process_ended(self, reason):
+        pass
+
     def command(self):
         pass
 
-    def get_poll_length(self):
+    def poll_length(self):
         pass
 
     class _ProcessProtocol(protocol.ProcessProtocol):
