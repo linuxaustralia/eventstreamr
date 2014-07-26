@@ -108,6 +108,7 @@ class UpdateConfiguration(Command):
 class ConfigurationManagerService(MultiService):
 
     def __init__(self, role_config, update_callback=lambda: None):
+        import roles
         """
 
         :param role_config: The configuration object loaded with all the necessary information.
