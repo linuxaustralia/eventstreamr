@@ -79,7 +79,23 @@ class Role(MultiService, object):
     def __init__(self):
         MultiService.__init__(self)
 
+    def startService(self):
+        print "Starting Role"
+        self.start()
+        MultiService.startService(self)
+
+    def stopService(self):
+        print "Starting Role"
+        self.stop()
+        MultiService.stopService(self)
+
+    def start(self):
+        pass
+
     def update(self, config):
+        pass
+
+    def stop(self):
         pass
 
 
