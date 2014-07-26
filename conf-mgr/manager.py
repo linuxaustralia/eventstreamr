@@ -1,5 +1,9 @@
 __author__ = 'Lee Symes'
 
+from lib.logging import getLogger, transmit
+print "Manager Imported!!!!"
+transmit = False # First thing is don't transmit.
+
 import time
 
 from twisted.application.service import Application, MultiService, Service
@@ -7,7 +11,6 @@ from twisted.application import internet
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.protocol import ServerFactory
 from twisted.protocols.amp import AMP
-from twisted.python import log
 
 from lib import general_commands
 from lib.commands import ListenableConfiguredAMP
@@ -16,6 +19,11 @@ from lib.exceptions import InvalidConfigurationException
 from lib.file_helper import load_json
 import lib.manager.queue
 from lib.manager import get_queue_directories
+from lib.manager.station_logs import StationLogReceiver
+
+
+
+log = getLogger(("manager", ), False)
 
 _registered_stations = {}
 """
@@ -43,6 +51,15 @@ class StationInformation:
     def name(self):
         return "%s(%s|%s)" % (self.station_config.hostname, self.station_config.ip, self.station_config.mac_address)
 
+    @property
+    def mac(self):
+        return self.station_config.mac_address
+
+    @property
+    def roles(self):
+        if self.station_config:
+            return self.station_config.roles
+        return {}
 
 class ManagerServerFactory(ServerFactory):
     maxDelay = 30
@@ -158,6 +175,9 @@ service_wrapper = MultiService()
 
 server = internet.TCPServer(static_config["listen_port"], ManagerServerFactory())
 server.setServiceParent(service_wrapper)
+
+station_log_receiver = StationLogReceiver(_registered_stations)
+station_log_receiver.setServiceParent(service_wrapper)
 
 queue_manager = QueueManagerStation(static_config.get("queues", {}))
 queue_manager.setServiceParent(service_wrapper)
