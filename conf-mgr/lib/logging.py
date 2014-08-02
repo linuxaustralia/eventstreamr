@@ -71,6 +71,9 @@ class Logger(LogPublisher):
     def error(self, message, **kw):
         self.msg(message, failure=failure.Failure(), isError=1, **kw)
 
+    def warning(self, message, **kw):
+        self.msg(message, isError=1, **kw)
+
     def err(self, _stuff=None, _why=None, **kw):
         """
         Write a failure to the log.

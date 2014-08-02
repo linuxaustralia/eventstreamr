@@ -17,5 +17,5 @@ class MissingRoleFactoryException(Exception):
 class BlockedRoleException(Exception):
 
     def __init__(self, message, roles=[]):
-        super(MissingRoleFactoryException, self).__init__(message)
+        super(BlockedRoleException, self).__init__(message)
         self.roles = roles

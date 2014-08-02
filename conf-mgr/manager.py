@@ -1,10 +1,8 @@
 __author__ = 'Lee Symes'
 
-from lib.logging import getLogger, transmit
+from lib.logging import getLogger
 print "Manager Imported!!!!"
-transmit = False # First thing is don't transmit.
-
-import time
+transmit = False  # First thing is don't transmit.
 
 from twisted.application.service import Application, MultiService, Service
 from twisted.application import internet
@@ -18,7 +16,7 @@ from lib.config import UpdateConfiguration
 from lib.exceptions import InvalidConfigurationException
 from lib.file_helper import load_json
 import lib.manager.queue
-from lib.manager import get_queue_directories
+from lib.manager.config_manager import StationConfigManager
 from lib.manager.station_logs import StationLogReceiver
 
 
@@ -60,6 +58,7 @@ class StationInformation:
         if self.station_config:
             return self.station_config.roles
         return {}
+
 
 class ManagerServerFactory(ServerFactory):
     maxDelay = 30
@@ -116,33 +115,40 @@ class RegisterStationWithManagerService(Service):
 
         info.station_config = config
 
-        # TODO load config from disk/database.
         __ = """
-            role_config = {"uuid": {
+            role_config = {
+                            "role": {
+                                "uuid": {
                                     "role": "encode",
                                     "timestamp": 1024
                                     ...
-                                   }
-                           "uuid": {
+                                }
+                                ...
+                            },
+                            "role2": {
+                                "uuid": {
                                     "role": "dvswitch",
                                     "timestamp": 1025
                                     ...
-                                   }
+                                }
+                                ...
+                            }
                           }
 
         """
-        role_config = {
-            "encode": {
-                "encode-uuid": {
-                    "script": "scripts/run_encode.py",
-                    "timestamp": int(time.time() * 1000)}}}
 
+        manager_role_config = config_manager.get_config_for(info.mac)
+
+        # The manager's config takes priority in the event timestamps are missing in both.
+        new_config = config_manager.merge_config(manager_role_config, config.roles)
+        print "New Config: %r" % new_config
+        config_manager.update_timestamps(new_config)
         try:
-            yield box_sender.callRemote(UpdateConfiguration, roles=role_config)
-        except InvalidConfigurationException as e:
-            log.err(_why="Failed to load config.")
-
-        info.station_config.roles = role_config
+            yield box_sender.callRemote(UpdateConfiguration, roles=new_config)
+            info.station_config.roles = new_config
+            config_manager.set_config_for(info.mac, new_config)
+        except InvalidConfigurationException:
+            log.error("Failed to load config.")
 
         returnValue({})
 
@@ -170,6 +176,8 @@ class QueueManagerStation(MultiService):
             queue.setServiceParent(self)
 
 static_config = load_json("manager.json")
+
+config_manager = StationConfigManager(static_config.get("config_storage", "station-config/"))
 
 service_wrapper = MultiService()
 

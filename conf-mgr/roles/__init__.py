@@ -10,6 +10,7 @@ import pkgutil as _pkgutil
 from twisted.application.service import MultiService
 
 from lib.logging import getLogger
+from lib.amp.mixins import PollingCommandServiceMixin
 
 __factories__ = {}
 
@@ -100,6 +101,34 @@ class Role(MultiService, object):
 
     def stop(self):
         pass
+
+
+class WatchdogRole(Role, PollingCommandServiceMixin):
+
+    def __init__(self, poll_length=0, command=None):
+        Role.__init__(self)
+        PollingCommandServiceMixin.__init__(self, poll_length, command)
+
+    def startService(self):
+        PollingCommandServiceMixin.startService(self)
+        Role.startService(self)
+
+    def stopService(self):
+        PollingCommandServiceMixin.stopService(self)
+        Role.stopService(self)
+
+    def out_received(self, data):
+        try:
+            self.log.cmd_output_stdout(data)
+        except NameError:
+            pass
+
+    def err_received(self, data):
+        try:
+            self.log.cmd_output_stderr(data)
+        except NameError:
+            pass
+
 
 
 loaded = []

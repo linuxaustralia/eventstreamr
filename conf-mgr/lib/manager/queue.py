@@ -7,21 +7,23 @@ from uuid import uuid1
 
 from twisted.application.internet import TimerService
 from twisted.internet.defer import inlineCallbacks
-from twisted.python import log
 
+from lib.logging import getLogger
 from lib import file_helper as files
 from lib.manager import get_queue_directories
-from roles import encode
+from roles import encode, cut
 
 __current_directories = []
 
+log = getLogger(["queue"])
 
 """
 Should be:
 (SendCommand, command_helper, Completed, Failed)
 """
 __queue_config = {
-    "encode": (encode.StartEncodeRequest, encode.encode_job_manager, encode.EncodeCompleted, encode.EncodeFailed)
+    "encode": (encode.StartEncodeRequest, encode.encode_job_manager, encode.EncodeCompleted, encode.EncodeFailed),
+    "cut": (cut.StartCutRequest, cut.cut_job_manager, cut.CutCompleted, cut.CutFailed)
 }
 
 
@@ -40,6 +42,7 @@ class Queue(TimerService):
     def __init__(self, all_stations, base_config, base_dir, poll_length, file_pattern,
                  send_command, command_helper, complete_command, failed_command):
         TimerService.__init__(self, poll_length, self.run_poll)
+        self.log = log
         self.all_stations = all_stations
         self.base_config = dict(base_config)
         self.base_folder = base_dir
@@ -48,6 +51,10 @@ class Queue(TimerService):
         self.complete_command = complete_command
         self.failed_command = failed_command
         self.command_helper = command_helper
+
+    def setName(self, name):
+        TimerService.setName(self, name)
+        self.log = getLogger(["queue", name])
 
     def startService(self):
         self.command_helper.responder(self.complete_command)(self.complete)
@@ -83,12 +90,12 @@ class Queue(TimerService):
                         (uuid, files.list_files_in(wip_folder, full_path=False)))
 
     def complete(self, uuid):
-        log.msg("Completed running %r inside %r" % (uuid, self.base_folder))
+        self.log.msg("Completed running %r inside %r" % (uuid, self.base_folder))
         self.migrate_file_by_uuid(uuid, "done")
         return {}
 
     def failed(self, uuid, reason):
-        log.err(_why="Failed to complete %r inside %r --> Reasons: %r" % (uuid, self.base_folder, reason))
+        self.log.warning("Failed to complete %r inside %r --> Reasons: %r" % (uuid, self.base_folder, reason))
         self.migrate_file_by_uuid(uuid, "fail")
         return {}
 
@@ -106,13 +113,13 @@ class Queue(TimerService):
     @inlineCallbacks
     def run_file(self, file):
         if not os.path.isfile(file):
-            log.err(_why="The following file disappeared out from underneath me: %s" % file)
+            self.log.warning("The following file disappeared out from underneath me: %s" % file)
             return
         config = dict(self.base_config)
-        log.msg("Base Config: %r" % config)
+        self.log.msg("Base Config: %r" % config)
         c2 = config.update(files.load_json(file))
-        log.msg("New Config : %r" % config)
-        log.msg("Config 2   : %r" % c2)
+        self.log.msg("New Config : %r" % config)
+        self.log.msg("Config 2   : %r" % c2)
         uuid = str(uuid1())
         new_file = uuid + os.path.basename(file)
 
@@ -120,13 +127,14 @@ class Queue(TimerService):
         random.shuffle(stations)
 
         for station_info in stations:
-            if "encode" in station_info.station_config.roles:
+            if self.name in station_info.station_config.roles:
+                print "Checking %r" % station_info.name
                 try:
                     res = yield station_info.station_transport.callRemote(self.send_command,
                                                                           job_uuid=uuid,
                                                                           job_config=config)
                 except:
-                    log.err(_why="Station%r exception whilst starting %r" % (station_info.name, file))
+                    log.error("Station%r exception whilst starting %r" % (station_info.name, file))
                 else:
                     if res["accepted"]:
                         log.msg("Starting to run %r on %r" % (new_file, station_info.name))

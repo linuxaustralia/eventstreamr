@@ -15,8 +15,8 @@ from lib.logging import transmit_service, getLogger
 log = getLogger(("general", ))
 
 class StationClientFactory(ReconnectingClientFactory):
-    maxDelay = 30
-    initialDelay = 5
+    maxDelay = 5
+    initialDelay = 1
 
     def __init__(self):
         pass

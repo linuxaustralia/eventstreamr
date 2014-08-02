@@ -2,11 +2,12 @@ __author__ = 'lee'
 
 from twisted.application.service import MultiService
 from twisted.internet.defer import DeferredList, maybeDeferred
-from twisted.python import log
 
 from lib.exceptions import InvalidConfigurationException, BlockedRoleException, MissingRoleFactoryException
+from lib.logging import getLogger
 from roles import get_factory, get_factory_names
 
+log = getLogger(["lib", "station", "manager"])
 
 class NamedMultiService(MultiService):
     """
@@ -78,22 +79,22 @@ class AllRolesManagerService(NamedMultiService):
         factories = set(get_factory_names())
         blocked_roles = self.blocked_roles.intersection(new_roles)
         if blocked_roles:
-            log.err(_why="The station was requested to run a role it is blocked from running.")
-            log.err(_why="Currently blocked roles: %r" % self.blocked_roles)
+            log.warning("The station was requested to run a role it is blocked from running.")
+            log.warning("Currently blocked roles: %r" % self.blocked_roles)
             for role in blocked_roles:
-                log.err(_why="`%s` is blocked from being loaded on this station" % role)
-                log.err(_why="Configuration given for `%s`: %r" % (role, roles[role]))
+                log.warning("`%s` is blocked from being loaded on this station" % role)
+                log.warning("Configuration given for `%s`: %r" % (role, roles[role]))
                 roles.pop(role)  # Remove it to prevent it from saving.
             raise BlockedRoleException("Invalid config file received. See logs for more information. "
                                        "Blocked Roles: %r" % blocked_roles)
 
         missing_roles = new_roles - factories
         if missing_roles:
-            log.err(_why="Failed to locate the following factories.")
-            log.err(_why="Currently defined factory names: %r" % factories)
+            log.warning("Failed to locate the following factories.")
+            log.warning("Currently defined factory names: %r" % factories)
             for role in missing_roles:
-                log.err(_why="`%s` does not have a factory configured." % role)
-                log.err(_why="Configuration given for `%s`: %r" % (role, roles[role]))
+                log.warning("`%s` does not have a factory configured." % role)
+                log.warning("Configuration given for `%s`: %r" % (role, roles[role]))
                 roles.pop(role)  # Remove it to prevent it from saving.
             raise MissingRoleFactoryException("Invalid config file received."
                                               " Missing Roles: %r" % missing_roles)
@@ -117,9 +118,9 @@ class RoleManagerService(NamedMultiService):
             updated_uuids = set(mapped_config.iterkeys())
 
             if self.factory.instances > 0 and len(updated_uuids) > self.factory.instances:
-                log.err(_why="Failed to update as there are too many new uuids. %d uuids > max %d instances" %
+                log.warning("Failed to update as there are too many new uuids. %d uuids > max %d instances" %
                              (len(updated_uuids), self.factory.instances))
-                log.err(_why="Recieved config: %r" % mapped_config)
+                log.warning("Recieved config: %r" % mapped_config)
                 raise InvalidConfigurationException("Failed to update as there are too many new uuids. %d uuids >"
                                                     " max %d instances" % (len(updated_uuids), self.factory.instances))
 

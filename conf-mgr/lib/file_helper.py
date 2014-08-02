@@ -63,9 +63,11 @@ def delete(file):
     import os
     return os.remove(file)
 
+
 def join(path, *paths):
     import os
     return os.path.join(path, *paths)
+
 
 
 def list_files_in(folder, full_path=True):

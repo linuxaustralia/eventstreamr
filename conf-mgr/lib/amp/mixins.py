@@ -57,7 +57,10 @@ class PollingCommandServiceMixin(PollingServiceMixin):
 
     def __init__(self, poll_length=None, command=None):
         if command is not None:
-            self.command = lambda: command
+            if callable(command):
+                self.command = command
+            else:
+                self.command = lambda: command
         PollingServiceMixin.__init__(self, poll_length)
 
     def do_poll(self):
@@ -65,8 +68,10 @@ class PollingCommandServiceMixin(PollingServiceMixin):
             command = [str(c) for c in self.command()]
         except:
             self.call_later = reactor.callLater(self.poll_length,
-                                                                self.do_poll)
+                                                self.do_poll)
+            print "Error occured. Trying again later"
             return
+        print "Running %r"
         reactor.spawnProcess(PollingCommandServiceMixin._ProcessProtocol(self), command[0], command)
 
     def startService(self):
