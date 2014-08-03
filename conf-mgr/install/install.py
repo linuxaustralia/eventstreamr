@@ -10,3 +10,4 @@ __author__ = 'lee'
 # ssh 10.4.4.3
 
 
+# git clone git@github.com:leesdolphin/eventstreamr.git
