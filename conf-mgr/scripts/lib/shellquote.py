@@ -5,6 +5,8 @@ import string
 # Quote a string for the shell, if necessary.
 #
 def shellquote(s, quote="'"):
+    if isinstance(s, unicode):
+        s = s.encode("latin-1")
     if s == "":
         if quote == '"':
             return '""'

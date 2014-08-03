@@ -19,6 +19,8 @@ def header(title):
 
 def call(*args, **kwargs):
     from subprocess import call
+    def call(*a, **kw):
+        print "%r" % ((a, kw),)
     kwargs.update(stdout=stdout, stderr=stderr, cwd=job_folder)
     r = call(*args, **kwargs)
     if r != 0:
@@ -28,25 +30,20 @@ def call(*args, **kwargs):
 json = loads(argv[-1])
 
 job_folder = os.path.abspath(json["base-folder"])
-
 in_time = int(json.get("in_time", "0"))
 out_time = int(json.get("out_time", "0"))
 out_file = join(job_folder, json["main"]["filename"])
 file_list = json["file_list"]
 schedule_id = json["schedule_id"]
 
-args = ["xvfb-run", "-a", "melt", "-silent", file_list[0], "in=" + in_time]
-args += file_list[1:]
-args += ["out=" + out_time, "-consumer", "avformat:" + out_file]
-
-
 cmd = [["dd", "bs=%d" % BYTES_PER_FRAME, "skip=%d" % in_time]]
 if len(file_list) > 2:
-    cmd.append(["cat"] + file_list[1:-2])
-if len(file_list) == 1:
-    cmd[-1].append("count=%d" % (out_time - in_time))
-else:
-    cmd.append(["dd", "bs=%d" % BYTES_PER_FRAME, "count=%d" % out_time])
+    cmd.append(["cat"] + file_list[1:-1])
+if out_time != 0:
+    if len(file_list) == 1:
+        cmd[-1].append("count=%d" % (out_time - in_time))
+    else:
+        cmd.append(["dd", "bs=%d" % BYTES_PER_FRAME, "count=%d" % out_time])
 
 cmd = "(%s)>%s" % (
     '; '.join(" ".join(shellquote(c) for c in cc) for cc in cmd),
