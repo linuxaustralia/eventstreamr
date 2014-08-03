@@ -21,7 +21,7 @@ if not os.path.exists(schedule_file):
     with open(schedule_file, "w") as f:
         f.write(urllib2.urlopen('http://2014.pycon-au.org/schedule/programme/json').read())
 
-recording_dir = os.path.join(base_dir, 'recording')
+recording_dir = '/srv/av'
 queue_todo_dir = os.path.join(base_dir, 'queue', 'cut', 'todo')
 
 json_format="%Y-%m-%d %H:%M:%S"
@@ -39,8 +39,6 @@ for talk in talks:
 # Create a dictionary of jobs and begin the main loop
 jobs = { t['schedule_id']: t for t in talks if t['playlist'] }
 
-print jobs
-
 print "Available jobs:", [t for t,v in jobs.items() if v['playlist']]
 n = prompt_for_number("Select a job")
 
@@ -50,12 +48,16 @@ while n:
     dv_files = [os.path.join(dv_file['filepath'], dv_file['filename']) for dv_file in talk['playlist']]
 
     with open(os.devnull, 'wb') as DEVNULL:
-        #subprocess.Popen(['vlc'] + dv_files, stderr=DEVNULL)
+        subprocess.Popen(['vlc'] + dv_files, stderr=DEVNULL)
         pass
 
     print
     print "Title:", talk['title']
-    print "Presenter:", talk['presenters']
+    if 'presenters' in talk:
+        print "Presenter:", talk['presenters']
+    else:
+        print "NO PRESENTER FOUND"
+        
     print "Files:"
     for i, dv_file in enumerate(dv_files):
         print i, dv_file
@@ -87,8 +89,14 @@ while n:
 
     talk["main"] = {"filename": str(talk['schedule_id']) + "-main.dv"}
     talk["intro"] = {"title": talk['title'],
-                     "presenters": talk['presenters'],
                      "filename": intro_file}
+    if "presenters" in talk:
+        talk['intro']['presenters'] = talk['presenters']
+    else:
+        if " by " in talk['title']:
+            (talk['intro']['title'], talk['intro']['presenters']) = talk['title'].split(" by ")
+        else:
+            talk['intro']['presenters'] = ""
     talk["credits"] = {"text": credits,
                        "filename": "credits.dv"
                        }
