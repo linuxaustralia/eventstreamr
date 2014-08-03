@@ -5,25 +5,36 @@ from json import loads
 import os
 from os.path import join
 
+def f():
+    stderr.flush()
+    stdout.flush()
+
+
 def header(title):
     print "#" * 120
     print "#" + (" " * 118) + "#"
     print "#" + title.center(118) + "#"
     print "#" + (" " * 118) + "#"
     print "#" * 120
+    f()
+
 
 def call(cmd, *args, **kwargs):
     from subprocess import call
     print "Command: %r" % (cmd, )
+    f()
     kwargs.update(stdout=stdout, stderr=stderr, cwd=job_folder)
     r = call(cmd, *args, **kwargs)
     if r != 0:
         print "Failed to call %r" % cmd
         exit(r)
+    f()
+
 
 def do_rsync(from_file, to_file):
     call(["rsync", "-u", from_file, to_file])
     print "Do something like rsync from %r to %r" % (from_file, to_file)
+    f()
 
 # Install perlmagick & xvfb
 
@@ -40,16 +51,19 @@ if __name__ == "__main__":
     base_folder = json["base-folder"]
     schedule_id = str(json["schedule_id"])
 
-
     job_folder = os.path.abspath(json["local_save"] + " - " + schedule_id)
     if not os.path.exists(job_folder):
         os.mkdir(job_folder)
 
     import atexit
     import shutil
-#    atexit.register(shutil.rmtree, job_folder)
+    atexit.register(shutil.rmtree, job_folder)
 
-    
+    extensions = json["extensions"]
+
+    server = json["server"]
+    base_folder = json["base-folder"]
+    schedule_id = str(json["schedule_id"])
 
     talk_file = json["main"]["filename"]
     talk_local_file = join(job_folder, talk_file)
@@ -63,7 +77,8 @@ if __name__ == "__main__":
     credits_local_file = join(job_folder, "..", credits_file)
     credits_text = json["credits"]["text"]
 
-#    do_rsync(server + ":" + join(base_folder, talk_file), talk_local_file)
+    header("Rsyncing files down")
+    do_rsync(server + ":" + join(base_folder, talk_file), talk_local_file)
     do_rsync(server + ":" + join(base_folder, intro_file), intro_local_file)
     do_rsync(server + ":" + join(base_folder, credits_file), credits_local_file)
 
@@ -96,16 +111,16 @@ if __name__ == "__main__":
 
         if extension == "mp4":
             args = melt_base + [intro_watermarked, talk_local_file, credits_watermarked, '-consumer',
-                    'avformat:' + base_output_file  + extension, "progressive=1", "acodec=libfaac", "ar=44100",
+                    'avformat:' + base_output_file + extension, "progressive=1", "acodec=libfaac", "ar=44100",
                     "ab=128k", "vcodec=libx264", "b=70k"]
         elif extension == "ogv":
             args = melt_base + [intro_watermarked, talk_local_file, credits_watermarked, '-consumer',
-                    'avformat:' + base_output_file  + extension, "progress=1", "threads=0", "vb=1000k", "quality=good",
+                    'avformat:' + base_output_file + extension, "progress=1", "threads=0", "vb=1000k", "quality=good",
                     "deadline=good", "deinterlace=1", "deinterlace_method=yadif"]
         elif extension == "ogg":
             args = ["ffmpeg", "-i", talk_local_file, "-vn", "-acodec", "libvorbis", "-aq", "6", "-metadata",
                     "TITLE=My title", "-metadata", "SPEAKER=Someone", "-metadata", "DATE=1/7/2014", "-metadata",
-                    "EVENT=PyconAu", base_folder + extension]
+                    "EVENT=PyconAu", base_output_file + extension]
         else:
             args = melt_base + [intro_watermarked, talk_local_file, credits_watermarked, '-consumer',
                     "avformat:" +  base_output_file + extension]

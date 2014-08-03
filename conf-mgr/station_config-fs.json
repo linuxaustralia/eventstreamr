@@ -1,0 +1,8 @@
+{
+    "cut": {
+        "cut-uuid": {
+            "script": "scripts/run_cut.py",
+            "timestamp": 1406875732155
+        }
+    }
+}

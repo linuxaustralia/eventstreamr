@@ -3,3 +3,7 @@ encoding/test
 conf-mgr/logs-temp
 conf-mgr/logs
 conf-mgr/station-logs
+conf-mgr/station.json
+conf-mgr/station_config.json
+conf-mgr/manager.json
+schedule.json

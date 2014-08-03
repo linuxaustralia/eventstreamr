@@ -1,0 +1,8 @@
+{
+    "encode": {
+        "encode-uuid": {
+            "script": "scripts/run_encode.py",
+            "timestamp": 1406875732155
+        }
+    }
+}

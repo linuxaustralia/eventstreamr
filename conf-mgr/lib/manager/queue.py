@@ -71,7 +71,8 @@ class Queue(TimerService):
     def migrate_file(self, old_file_name, new_file_name, from_folder_type, to_folder_type):  # Helper
         old_file = os.path.join(get_queue_directories(self.base_folder, from_folder_type), old_file_name)
         if not os.path.isfile(old_file):
-            raise Exception("Failed to locate the original file: " % old_file)
+            log.warning("Failed to locate the original file: %r" % old_file)
+            return
 
         new_folder = get_queue_directories(self.base_folder, to_folder_type)
         if not os.path.isdir(new_folder):
