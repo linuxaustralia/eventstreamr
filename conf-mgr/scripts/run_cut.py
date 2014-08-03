@@ -6,6 +6,9 @@ from sys import argv, stderr, stdout
 from json import loads
 import os
 from os.path import join
+from lib.shellquote import shellquote
+
+BYTES_PER_FRAME = 144000
 
 def header(title):
     print "#" * 120
@@ -26,8 +29,8 @@ json = loads(argv[-1])
 
 job_folder = os.path.abspath(json["base-folder"])
 
-in_time = json["in_time"]
-out_time = json["out_time"]
+in_time = int(json.get("in_time", "0"))
+out_time = int(json.get("out_time", "0"))
 out_file = join(job_folder, json["main"]["filename"])
 file_list = json["file_list"]
 schedule_id = json["schedule_id"]
@@ -37,5 +40,16 @@ args += file_list[1:]
 args += ["out=" + out_time, "-consumer", "avformat:" + out_file]
 
 
-call(args)
+cmd = [["dd", "bs=%d" % BYTES_PER_FRAME, "skip=%d" % in_time]]
+if len(file_list) > 2:
+    cmd.append(["cat"] + file_list[1:-2])
+if len(file_list) == 1:
+    cmd[-1].append("count=%d" % (out_time - in_time))
+else:
+    cmd.append(["dd", "bs=%d" % BYTES_PER_FRAME, "count=%d" % out_time])
 
+cmd = "(%s)>%s" % (
+    '; '.join(" ".join(shellquote(c) for c in cc) for cc in cmd),
+    shellquote(out_file))
+
+call(cmd, shell=True)
