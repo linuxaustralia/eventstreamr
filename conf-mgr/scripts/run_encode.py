@@ -116,8 +116,7 @@ if __name__ == "__main__":
 
         if extension == "mp4":
             args = melt_base + [intro_watermarked, talk_local_file, credits_watermarked, '-consumer',
-                    'avformat:' + base_output_file + extension, "progressive=1", "acodec=libfaac", "ar=44100",
-                    "ab=128k", "vcodec=libx264", "b=70k"]
+                    'avformat:' + base_output_file + extension, "progressive=1", "vcodec=libx264"]
         elif extension == "ogv":
             args = melt_base + [intro_watermarked, talk_local_file, credits_watermarked, '-consumer',
                     'avformat:' + base_output_file + extension, "progress=1", "threads=0", "vb=1000k", "quality=good",
