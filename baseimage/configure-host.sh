@@ -191,7 +191,7 @@ sed -i "s/${existing}/${hostname}/g" /etc/hostname
 
 
 echo "- updating /etc/rc.local to start eventstreamr bits"
-cp $IMAGE/rc.local /etc/rc.local
+cp $IMAGE/upstart/station-mgr.conf /etc/init/station-mgr.conf
 
 echo "- fix grub"
 /usr/sbin/grub-install /dev/sda
