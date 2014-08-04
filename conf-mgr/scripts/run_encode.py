@@ -4,6 +4,7 @@ from sys import argv, stderr, stdout
 from json import loads
 import os
 from os.path import join
+import re
 
 def f():
     stderr.flush()
@@ -23,6 +24,8 @@ def call(cmd, *args, **kwargs):
     from subprocess import call
     print "Command: %r" % (cmd, )
     f()
+    #def call(*a, **kw):
+    #    print "%r" % ((a, kw),)
     kwargs.update(stdout=stdout, stderr=stderr, cwd=job_folder)
     r = call(cmd, *args, **kwargs)
     if r != 0:
@@ -72,6 +75,8 @@ if __name__ == "__main__":
     intro_local_file = join(job_folder, "..", intro_file)
     title = json["intro"]["title"]
     presenters = json["intro"]["presenters"]
+    date_given = re.match(".*/(20[0-9][0-9]-[0-9][0-9]-[0-9][0-9])_.*[.]dv", json["file_list"][0])
+    date_given = date_given and date_given.group(1) or ""
 
     credits_file = json["credits"]["filename"]
     credits_local_file = join(job_folder, "..", credits_file)
@@ -119,7 +124,7 @@ if __name__ == "__main__":
                     "deadline=good", "deinterlace=1", "deinterlace_method=yadif"]
         elif extension == "ogg":
             args = ["ffmpeg", "-i", talk_local_file, "-vn", "-acodec", "libvorbis", "-aq", "6", "-metadata",
-                    "TITLE=My title", "-metadata", "SPEAKER=Someone", "-metadata", "DATE=1/7/2014", "-metadata",
+                    "TITLE=%s" % title, "-metadata", "SPEAKER=%s" % presenters, "-metadata", "DATE=%s" % date_given, "-metadata",
                     "EVENT=PyconAu", base_output_file + extension]
         else:
             args = melt_base + [intro_watermarked, talk_local_file, credits_watermarked, '-consumer',
