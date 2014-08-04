@@ -36,14 +36,14 @@ out_file = join(job_folder, json["main"]["filename"])
 file_list = json["file_list"]
 schedule_id = json["schedule_id"]
 
-cmd = [["dd", "bs=%d" % BYTES_PER_FRAME, "skip=%d" % in_time]]
+cmd = [["dd", "if=%s" % file_list[0],"bs=%d" % BYTES_PER_FRAME, "skip=%d" % in_time]]
 if len(file_list) > 2:
     cmd.append(["cat"] + file_list[1:-1])
 if out_time != 0:
     if len(file_list) == 1:
         cmd[-1].append("count=%d" % (out_time - in_time))
     else:
-        cmd.append(["dd", "bs=%d" % BYTES_PER_FRAME, "count=%d" % out_time])
+        cmd.append(["dd", "if=%s" % file_list[-1], "bs=%d" % BYTES_PER_FRAME, "count=%d" % out_time])
 
 cmd = "(%s)>%s" % (
     '; '.join(" ".join(shellquote(c) for c in cc) for cc in cmd),
