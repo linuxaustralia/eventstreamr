@@ -19,8 +19,8 @@ def header(title):
 
 def call(*args, **kwargs):
     from subprocess import call
-    def call(*a, **kw):
-        print "%r" % ((a, kw),)
+    #def call(*a, **kw):
+    #    print "%r" % ((a, kw),)
     kwargs.update(stdout=stdout, stderr=stderr, cwd=job_folder)
     r = call(*args, **kwargs)
     if r != 0:
