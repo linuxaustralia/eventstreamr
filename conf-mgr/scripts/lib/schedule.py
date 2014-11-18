@@ -31,9 +31,13 @@ def get_schedule(schedule_file, json_format):
     talks = []
     for schedule_room, schedule_room_data in schedule_data.iteritems():
         for schedule_talk in schedule_room_data:
-            if "presenters" not in schedule_talk:
+            copyfields = list(fields)
+            if "break" in schedule_talk or "heading" in schedule_talk:
                 continue
-            talk = {field: schedule_talk[field] for field in fields}
+            if "presenters" not in schedule_talk:
+                copyfields.remove("presenters")
+            
+            talk = {field: schedule_talk[field] for field in copyfields}
             talk['room'] = schedule_room
             talk['start'] = datetime.datetime.strptime(schedule_talk['start'], json_format)
             talk['end'] = datetime.datetime.strptime(schedule_talk['end'], json_format)
