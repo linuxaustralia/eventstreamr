@@ -44,8 +44,6 @@ def load_averages():
     """
     This method calculates the load averages for the past 1, 5 and 15 minutes and returns them as a percentage of the
     total cpu usage. This means that a load of 1.5 on a 2 core cpu will actually return 0.75.
-    :return:
-    :rtype: tuple(int, int, int)
     """
     from subprocess import check_output
 
@@ -55,6 +53,3 @@ def load_averages():
     # Different `uptime` versions uses `, ` and ` ` to denominate. Be cross platform.
     times = [float(t.strip(", ").strip()) / cores for t in load.split(" ")]
     return times
-
-
-

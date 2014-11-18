@@ -16,6 +16,7 @@
             "station_config": {
                 "base-folder": "/srv/av/cut/"
             },
+            "duplicate_complete": ""
             "base_path": "/home/av/eventstreamr/queue/cut/",
             "file_pattern": "*.json",
             "poll_length": 10

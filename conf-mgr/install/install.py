@@ -16,6 +16,7 @@ def exit(reason, code=-1):
 
 
 def elevate_privileges():
+  # Modified from http://stackoverflow.com/a/5222710/369021
   sudo_exit_code = 0
   with open(os.devnull, 'w') as fnull:
     sudo_exit_code = subprocess.call(["sudo", "-n", "false"])
