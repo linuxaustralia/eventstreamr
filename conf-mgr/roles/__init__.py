@@ -129,7 +129,7 @@ class WatchdogRole(Role, PollingCommandServiceMixin):
         except NameError:
             pass
 
-
+# TODO make this a function that doesn't get called when testing ect.
 
 loaded = []
 for importer, module_name, is_pkg in _pkgutil.iter_modules(__path__):

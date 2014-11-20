@@ -75,7 +75,7 @@ class PollingCommandServiceMixin(PollingServiceMixin):
         reactor.spawnProcess(PollingCommandServiceMixin._ProcessProtocol(self), command[0], command)
 
     def do_call_later(self, override=True):
-        if (override && self.call_later is None) || self.call_later is not None:
+        if (override and self.call_later is None) or (self.call_later is not None):
             self.call_later = reactor.callLater(self.poll_length,
                                               self.do_poll)
 

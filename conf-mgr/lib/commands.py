@@ -41,8 +41,8 @@ class ListenableConfiguredAMP(ConfiguredCommandAMP):
     """
 
     def __init__(self,
-                 start=lambda self, box_sender: None,
-                 stop=lambda self, reason: None):
+                 start=(lambda self, box_sender: None),
+                 stop=(lambda self, reason: None)):
         """
         :param start: A function handle that is called when a connection starts.
         :type start: (ListenableConfiguredAMP, IBoxSender) -> None

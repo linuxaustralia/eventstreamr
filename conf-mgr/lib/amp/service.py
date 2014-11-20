@@ -5,6 +5,8 @@ from twisted.application.service import Service
 
 class CommandWatchdogService(PollingCommandServiceMixin, Service):
 
+    __doc__
+
     def __init__(self, poll_length=0, command=None):
         Service.__init__(self)
         PollingCommandServiceMixin.__init__(self, poll_length, command)
