@@ -45,7 +45,7 @@ class SendLogsCommand(amp.Command):
 
 class Logger(LogPublisher):
 
-    def __init__(self, location=("general",), transmit=True):
+    def __init__(self, location=("general",), transmit=False):
         self.location = location
         self.transmit = transmit
         LogPublisher.__init__(self)
@@ -294,7 +294,7 @@ def build_file(folder, paths, extension):
     return folder, paths[-1] + extension
 
 
-accepted_chars = string.ascii_letters + string.digits + '-'
+accepted_chars = string.ascii_letters + string.digits + '-_'
 def check_path(path):
     """
 
@@ -332,5 +332,3 @@ observer = LogObserver(transmit_service)
 
 if __name__ == "__main__":
     getLogger(["general"]).msg("Hello World")
-
-
