@@ -13,8 +13,8 @@ from roles import RoleFactory, Role, register_factory
 from lib.computer_info import load_averages, num_cores
 from lib.logging import getLogger
 
-_encode_job_station = configuration_helper("encode jobs(On Station)")
-encode_job_manager = configuration_helper("encode jobs(On Manager)")
+_encode_job_station = configuration_helper("Encode jobs(On Station)")
+encode_job_manager = configuration_helper("Encode jobs(On Manager)")
 
 
 @_encode_job_station.command
@@ -52,7 +52,6 @@ class EncodeRole(CommandRegistrationServiceMixin, Role):
     def start_encode(self, sender, job_uuid, job_config):
         if not self.can_encode():
             return {"accepted": False}
-        # Add more in here(if too many may move into a separate function).
         EncodeRunner(sender, job_uuid, self.config, job_config).setServiceParent(self)
         return {"accepted": True}
 
@@ -62,13 +61,14 @@ class EncodeRole(CommandRegistrationServiceMixin, Role):
                 # Between 7am and 7pm on a mixer so we won't do any encoding.
                 return False
         if load_averages()[1] > 0.8: # Load for the past 5 minutes averaging more than 80%
-            self.log.msg("5 Minute Average Load too damn high")
+            self.log.msg("5 Minute Average Load too damn high [1:%d 5:%d 15:%d]" % load_averages())
             return False
         if load_averages()[0] > 0.9: # Load for the past 1 minute averaging more than 90%.
-            self.log.msg("1 Minute Average Load too damn high")
+            self.log.msg("1 Minute Average Load too damn high [1:%d 5:%d 15:%d]" % load_averages())
             return False
         if len(self.services) >= num_cores(): # One job per core.
-            self.log.msg("I've got a lot on my plate right now. I only have so many CPUs.")
+            self.log.msg("I've got a lot on my plate right now. I only have so " +
+                         "many CPUs(jobs:%d cpus:%d)." % (len(self.services), num_cores()))
             return False
         return True
 
@@ -76,9 +76,9 @@ class EncodeRole(CommandRegistrationServiceMixin, Role):
         self.config = config
 
 
-########################################################################################################################
-#                                   BEGIN ROLE FACTORY                                                                 #
-########################################################################################################################
+####################################################################################################
+#                                   BEGIN ROLE FACTORY                                             #
+####################################################################################################
 
 
 class EncodeRoleFactory(RoleFactory):
@@ -98,9 +98,9 @@ encode_factory = EncodeRoleFactory()
 register_factory("encode", encode_factory)
 
 
-########################################################################################################################
-#                                   BEGIN ROLE ENCODE IMPLEMENTATION                                                   #
-########################################################################################################################
+####################################################################################################
+#                                   BEGIN ROLE ENCODE IMPLEMENTATION                               #
+####################################################################################################
 
 
 class EncodeRunner(Service, protocol.ProcessProtocol):
@@ -115,8 +115,8 @@ class EncodeRunner(Service, protocol.ProcessProtocol):
         self.log.msg("Starting %r with %r" % (uuid, job_config))
 
     def startService(self):
-        # Modify this to change what arguments are passed in. Currently it's just the json of the config, but you may
-        # want/need the UUID as well. It's up to you.
+        # Modify this to change what arguments are passed in. Currently it's just the json of
+        # the config, but you may want/need the UUID as well. It's up to you.
         command = [self.base_config["script"]] + [object_to_json_string(self.job_config)]
         self.log.msg("Command to be run: %r" % command)
         reactor.spawnProcess(self, command[0], command)

@@ -51,6 +51,7 @@ class PollingServiceMixin(object):
     def stopService(self):
         if self.call_later and self.call_later.active():
             self.call_later.cancel()
+        self.call_later = None
 
 
 class PollingCommandServiceMixin(PollingServiceMixin):
@@ -67,15 +68,19 @@ class PollingCommandServiceMixin(PollingServiceMixin):
         try:
             command = [str(c) for c in self.command()]
         except:
-            self.call_later = reactor.callLater(self.poll_length,
-                                                self.do_poll)
+            self.do_call_later()
             print "Error occured. Trying again later"
             return
-        print "Running %r"
+        print "Running %r" % command
         reactor.spawnProcess(PollingCommandServiceMixin._ProcessProtocol(self), command[0], command)
 
+    def do_call_later(self, override=True):
+        if (override && self.call_later is None) || self.call_later is not None:
+            self.call_later = reactor.callLater(self.poll_length,
+                                              self.do_poll)
+
     def startService(self):
-        self.call_later = reactor.callLater(self.poll_length, self.do_poll)
+        self.do_call_later(override=False)
 
     def connection_made(self, transport):
         pass
@@ -117,6 +122,5 @@ class PollingCommandServiceMixin(PollingServiceMixin):
             self.command_service.err_received(data)
 
         def processEnded(self, reason):
-            self.command_service.call_later = reactor.callLater(self.command_service.poll_length,
-                                                                self.command_service.do_poll)
+            self.command_service.call_later
             self.command_service.process_ended(reason)
