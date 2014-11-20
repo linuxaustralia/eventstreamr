@@ -1,70 +1,93 @@
-
+from collections import OrderedDict
 from lib.logging import getLogger
 from twisted.application.service import MultiService
 
-log = getLogger(("manager", ), False)
+_log = getLogger(("lib", "configuratuion", "__init__"))
 
 
-__config_classes = {};
-
-def service_config(config_name, cfg_class=None):
-  if not isinstance(config_name, basestring):
-    raise ValueError("Incorrect call")
-  def configure(config_class):
-    if config_name in __config_classes:
-      raise ValueError("Duplicate registration")
-    # TODO: Confirm that the class is of the correct type.
-    __config_classes[class_name] = config_class
-    return config_class
-  if cfg_class is not None:
-    return configure(cfg_class)
-  else return configure
-
-
-class ConfigManager(MultiService):
+class ConfigurationManager(MultiService):
 
   def __init__(self):
-    self.__configs = {}
-    pass
+    self.configs = {}
 
-  def update_configs(self, service_name, new_config, default=False):
-    if service_name not in __config_classes:
-      raise ValueError("That service is not regisered. Ensure that your module is imported")
-    else if service_name not in self.__configs:
-      new_config = __config_classes[service_name]()
-      self.__configs[service_name] = new_config
+  def __str__(self):
+    import json
+    return json.dumps(self.configs, indent=4)
 
-    self.__configs[service_name].update_configs(new_config, default=default);
+  def __repr__(self):
+    return "%s(%s)" % (self.__class__.__name__, str(self))
+
+  def set_config(self, service_name, source_name, source_priority, new_config):
+    self.configs.setdefault(service_name, {}) # Setup service name
+    self.configs[service_name][source_name] = {"priority": source_priority,
+                                               "config": new_config}
 
   def get_config(self, service_name):
-    if service_name not in self.__configs:
-      return None
-    else:
-      return self.__configs[service_name]
+    return ServiceConfigurationWrapper(self, service_name)
 
-  def delete_config(self, service_name):
-      if service_name not in self.__configs:
-        return None
+  def delete_config(self, service_name, source_name=None):
+    if service_name in self.configs:
+      if source_name is not None:
+        self.configs[service_name].pop(source_name, None)
       else:
-        old_service = self.__configs.pop(service_name, None)
-        if old_service is not None:
-          old_service.deactivate()
-          return True
-        return None
+        self.configs.pop(service_name)
+    return None
 
 
+class ServiceConfigurationWrapper(object):
 
+  def __init__(self, config_manager, service_name):
+    self.config_manager = config_manager
+    self.service_name = service_name
 
+  def __repr__(self):
+    return "%s(%r, %r)" % (self.__class__.__name__, self.config_manager, self.service_name)
 
-class ConfigurationStore(object):
+  def service_config(self):
+    return self.config_manager.configs.get(self.service_name, {})
 
-  def __init__(self):
-    super(ConfigurationStore, self).__init__()
+  def ordered_configs(self):
+    return map(lambda v: v["config"],
+               sorted(self.service_config().values(), reverse=True, key=lambda v: v["priority"]))
 
-  def update_configs(self, new_config, default=False):
-    # Default No-op
-    pass
+  def get(self, key, default=None):
+    cfgs = self.ordered_configs()
+    for cfg in cfgs:
+      if key in cfg:
+        return cfg[key]
+    return default
 
-  def deactivate(self):
-    # Also No-op
-    pass
+  def __getitem__(self, key):
+    cfgs = self.ordered_configs()
+    for cfg in cfgs:
+      if key in cfg:
+        return cfg[key]
+    raise KeyError("Missing %r" % key)
+
+  def keys(self):
+    cfgs = self.ordered_configs()
+    keys = set()
+    for cfg in cfgs:
+      keys.update(cfg.keys())
+    return keys
+
+  def __iter__(self):
+    return iter(self.keys())
+
+  def __len__(self):
+    return len(self.keys())
+
+  def __contains__(self, key):
+    cfgs = self.ordered_configs()
+    for cfg in cfgs:
+      if key in cfg:
+        return True
+    return False
+
+  def all(self, key):
+    values = []
+    cfgs = self.ordered_configs()
+    for cfg in cfgs:
+      if key in cfg:
+        values.append(cfg[key])
+    return values
