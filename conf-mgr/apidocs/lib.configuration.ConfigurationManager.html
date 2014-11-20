@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>lib.configuration.ConfigurationManager : API documentation</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+    
+    
+  </head>
+  <body>
+    <h1 class="class">l.c.ConfigurationManager(<span title="twisted.application.service.MultiService">MultiService</span>, <a href="lib.utils.Observable.html">Observable</a>) : class documentation</h1>
+    <p>
+      <span id="part">Part of <a href="lib.html">lib</a>.<a href="lib.configuration.html">configuration</a></span>
+      
+      <a href="classIndex.html#lib.configuration.ConfigurationManager">View In Hierarchy</a>
+    </p>
+    <div>
+      
+    </div>
+    <div class="docstring">
+      <div><p>This object manages sotring and accessing configurations.</p>
+<p>This object stores individual configurations on a 2-level hierarchy and 
+enables the configurations to be ordered using an arbitary priority 
+system.</p>
+<p>The 2 levels are named <code>service_name</code> and 
+<code>source_name</code> to represent the service and the source of the 
+configuration respectively. All configurations under a common 
+`service_name` are agregated using the <a href="lib.configuration.ServiceConfigurationWrapper.html"><code>ServiceConfigurationWrapper</code></a>
+which allows for easy access to individual configuration items.</p>
+<p>The priority given to <code>set_config</code> is taken to mean that the 
+larger(numerically) the number, the more important it is. So in the case 
+where 2 configurations provide the same key; the configuration with the 
+larger priority number will be used.</p>
+<p>All observers will be called with 2 parameters; this object and the 
+service name that was updated. Note that it is possible that when an event 
+is fired, the end-user data has not changed. For example removing a 
+non-existant source will fire an event without the configuration being 
+changed.</p><table class="fieldTable"></table></div>
+    </div>
+
+    
+    <div id="splitTables">
+      <table class="children sortable" id="id35">
+  
+  
+  <tr class="instancevariable">
+    
+    
+    <td>Instance Variable</td>
+    <td><a href="lib.configuration.ConfigurationManager.html#configs">configs</a></td>
+    <td>A <code>dict</code> storing all the configurations.</td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.configuration.ConfigurationManager.html#__init__">__init__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.configuration.ConfigurationManager.html#__str__">__str__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.configuration.ConfigurationManager.html#__repr__">__repr__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.configuration.ConfigurationManager.html#set_config">set_config</a></td>
+    <td><span>Assigns the given configuration to the service's configuration.</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.configuration.ConfigurationManager.html#get_config">get_config</a></td>
+    <td><span>Assigns the given configuration to the service's configuration.</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.configuration.ConfigurationManager.html#delete_config">delete_config</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+      <invisible>
+        <p>
+          Inherited from <a href="lib.utils.Observable.html">Observable</a>:
+        </p>
+        <table class="children sortable" id="id36">
+  
+  
+  <tr class="basemethod">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.utils.Observable.html#add_observer">add_observer</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="basemethod">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.utils.Observable.html#remove_observer">remove_observer</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="basemethod private">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.utils.Observable.html#_notify_observers">_notify_observers</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+      </invisible>
+    </div>
+    
+    
+
+    <div class="function">
+  <a name="lib.configuration.ConfigurationManager.configs">
+    
+  </a>
+  <a name="configs">
+    
+  </a>
+  <div class="functionHeader">
+    configs =
+  </div>
+  <div class="functionBody">
+    A <code>dict</code> storing all the configurations.
+  </div>
+</div><div class="function">
+  <a name="lib.configuration.ConfigurationManager.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="lib.utils.Observable.html#__init__">lib.utils.Observable.__init__</a></div>
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.configuration.ConfigurationManager.__str__">
+    
+  </a>
+  <a name="__str__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __str__(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.configuration.ConfigurationManager.__repr__">
+    
+  </a>
+  <a name="__repr__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __repr__(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.configuration.ConfigurationManager.set_config">
+    
+  </a>
+  <a name="set_config">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    set_config(self, service_name, source_name, source_priority, new_config):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Assigns the given configuration to the service's configuration.</p>
+<p>If there is an existing (<code>service_name</code>, 
+<code>source_name</code>) pair then it will be overwritten with the values 
+given. The source name can be reused over multiple service names without 
+any ill effects.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">service_name</td><td>The name of the service.</td></tr><tr><td></td><td class="fieldArg">source_name</td><td>The name of the source.</td></tr><tr><td></td><td class="fieldArg">source_priority</td><td>The priority of the source.</td></tr><tr><td></td><td class="fieldArg">new_config</td><td>A mapping containing the configuration.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="lib.configuration.ConfigurationManager.get_config">
+    
+  </a>
+  <a name="get_config">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    get_config(self, service_name):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Assigns the given configuration to the service's configuration.</p>
+<p>If there is an existing (<code>service_name</code>, 
+<code>source_name</code>) pair then it will be overwritten with the values 
+given. The source name can be reused over multiple service names without 
+any ill effects.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">service_name</td><td>The name of the service.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">A read only dictionary like object that manages retrieving the 
+configuration in a transparent manner. (type: <a href="lib.configuration.ServiceConfigurationWrapper.html"><code>ServiceConfigurationWrapper</code></a>)</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="lib.configuration.ConfigurationManager.delete_config">
+    
+  </a>
+  <a name="delete_config">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    delete_config(self, service_name, source_name=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+    <address>
+      <a href="index.html">API Documentation</a> for Conference Manager, generated by <a href="https://launchpad.net/pydoctor/">pydoctor</a> at 2014-11-20 16:41:46.
+    </address>
+  </body>
+</html>

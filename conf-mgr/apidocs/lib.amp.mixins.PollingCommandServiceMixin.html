@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>lib.amp.mixins.PollingCommandServiceMixin : API documentation</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+    
+    
+  </head>
+  <body>
+    <h1 class="class">l.a.m.PollingCommandServiceMixin(<a href="lib.amp.mixins.PollingServiceMixin.html">PollingServiceMixin</a>) : class documentation</h1>
+    <p>
+      <span id="part">Part of <a href="lib.html">lib</a>.<a href="lib.amp.html">amp</a>.<a href="lib.amp.mixins.html">mixins</a></span>
+      
+      <a href="classIndex.html#lib.amp.mixins.PollingCommandServiceMixin">View In Hierarchy</a>
+    </p>
+    <div>
+      <p>Known subclasses: <a href="lib.amp.service.CommandWatchdogService.html">lib.amp.service.CommandWatchdogService</a>, <a href="roles.monitoring.MonitoringRole.html">roles.monitoring.MonitoringRole</a>, <a href="roles.WatchdogRole.html">roles.WatchdogRole</a></p>
+    </div>
+    <div class="docstring">
+      <div class="undocumented">Undocumented</div>
+    </div>
+
+    
+    <div id="splitTables">
+      <table class="children sortable" id="id14">
+  
+  
+  <tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin.html#__init__">__init__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin.html#do_poll">do_poll</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin.html#do_call_later">do_call_later</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin.html#startService">startService</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin.html#connection_made">connection_made</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin.html#out_received">out_received</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin.html#err_received">err_received</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin.html#process_ended">process_ended</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin.html#command">command</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="class private">
+    
+    
+    <td>Class</td>
+    <td><a href="lib.amp.mixins.PollingCommandServiceMixin._ProcessProtocol.html">_ProcessProtocol</a></td>
+    <td><span class="undocumented">No class docstring; 1/5 methods documented</span></td>
+  </tr>
+</table>
+      <invisible>
+        <p>
+          Inherited from <a href="lib.amp.mixins.PollingServiceMixin.html">PollingServiceMixin</a>:
+        </p>
+        <table class="children sortable" id="id15">
+  
+  
+  <tr class="basemethod">
+    
+    
+    <td>Method</td>
+    <td><a href="lib.amp.mixins.PollingServiceMixin.html#stopService">stopService</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+      </invisible>
+    </div>
+    
+    
+
+    <div class="function">
+  <a name="lib.amp.mixins.PollingCommandServiceMixin.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, poll_length=None, command=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="lib.amp.mixins.PollingServiceMixin.html#__init__">lib.amp.mixins.PollingServiceMixin.__init__</a></div><div class="interfaceinfo">overridden in <a href="lib.amp.service.CommandWatchdogService.html">lib.amp.service.CommandWatchdogService</a>, <a href="roles.monitoring.MonitoringRole.html">roles.monitoring.MonitoringRole</a>, <a href="roles.WatchdogRole.html">roles.WatchdogRole</a></div>
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.amp.mixins.PollingCommandServiceMixin.do_poll">
+    
+  </a>
+  <a name="do_poll">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    do_poll(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="lib.amp.mixins.PollingServiceMixin.html#do_poll">lib.amp.mixins.PollingServiceMixin.do_poll</a></div>
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.amp.mixins.PollingCommandServiceMixin.do_call_later">
+    
+  </a>
+  <a name="do_call_later">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    do_call_later(self, override=True):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.amp.mixins.PollingCommandServiceMixin.startService">
+    
+  </a>
+  <a name="startService">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    startService(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="lib.amp.mixins.PollingServiceMixin.html#startService">lib.amp.mixins.PollingServiceMixin.startService</a></div><div class="interfaceinfo">overridden in <a href="lib.amp.service.CommandWatchdogService.html">lib.amp.service.CommandWatchdogService</a>, <a href="roles.monitoring.MonitoringRole.html">roles.monitoring.MonitoringRole</a>, <a href="roles.WatchdogRole.html">roles.WatchdogRole</a></div>
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.amp.mixins.PollingCommandServiceMixin.connection_made">
+    
+  </a>
+  <a name="connection_made">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    connection_made(self, transport):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.amp.mixins.PollingCommandServiceMixin.out_received">
+    
+  </a>
+  <a name="out_received">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    out_received(self, data):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="lib.amp.service.CommandWatchdogService.html">lib.amp.service.CommandWatchdogService</a>, <a href="roles.monitoring.MonitoringRole.html">roles.monitoring.MonitoringRole</a>, <a href="roles.WatchdogRole.html">roles.WatchdogRole</a></div>
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.amp.mixins.PollingCommandServiceMixin.err_received">
+    
+  </a>
+  <a name="err_received">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    err_received(self, data):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="lib.amp.service.CommandWatchdogService.html">lib.amp.service.CommandWatchdogService</a>, <a href="roles.monitoring.MonitoringRole.html">roles.monitoring.MonitoringRole</a>, <a href="roles.WatchdogRole.html">roles.WatchdogRole</a></div>
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.amp.mixins.PollingCommandServiceMixin.process_ended">
+    
+  </a>
+  <a name="process_ended">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    process_ended(self, reason):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="lib.amp.mixins.PollingCommandServiceMixin.command">
+    
+  </a>
+  <a name="command">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    command(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="roles.monitoring.MonitoringRole.html">roles.monitoring.MonitoringRole</a></div>
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+    <address>
+      <a href="index.html">API Documentation</a> for Conference Manager, generated by <a href="https://launchpad.net/pydoctor/">pydoctor</a> at 2014-11-20 16:41:46.
+    </address>
+  </body>
+</html>
