@@ -1,17 +1,25 @@
 __author__ = 'Lee Symes'
 __doc__ = """
-This file contains utilities for this computer's information including the current MAC address, IP address and computer
- name.
+Provides untility functions for accessing information about the computer.
+
 
 """
 
 
 def is_production():
+    """
+    Returns a truthy value if this is being run in production. It checks if the C{PRODUCTION}
+    environment variable is defined to be a truthy value.
+    """
     import os
     return os.environ.get("PRODUCTION", False)
 
 
 def computer_ip():
+    """
+    Returns the computer's IP address by calling C{ifdata}. Otherwise simply returning a constant
+    IP address.
+    """
     from subprocess import check_output
     try:
         return check_output(["ifdata", "-pa", "eth0"]).rstrip()
@@ -20,6 +28,9 @@ def computer_ip():
 
 
 def computer_hostname():
+    """
+    Returns the computer's name as given by C{hostname}. Otherwise simply returning a constant name.
+    """
     from subprocess import check_output
     try:
         return check_output(["hostname"]).rstrip()
@@ -28,6 +39,10 @@ def computer_hostname():
 
 
 def computer_mac_address():
+    """
+    Returns the computer's MAC address by calling C{ifdata}. Otherwise simply returning a constant
+    MAC address.
+    """
     from subprocess import check_output
     try:
         return check_output(["ifdata", "-ph", "eth0"]).rstrip()
@@ -36,14 +51,18 @@ def computer_mac_address():
 
 
 def num_cores():
+    """
+    Returns the number of CPUs using L{multiprocessing.cpu_count}.
+    """
     from multiprocessing import cpu_count
     return cpu_count()
 
 
 def load_averages():
     """
-    This method calculates the load averages for the past 1, 5 and 15 minutes and returns them as a percentage of the
-    total cpu usage. This means that a load of 1.5 on a 2 core cpu will actually return 0.75.
+    This method calculates the load averages for the past 1, 5 and 15 minutes and returns them
+    as a percentage of the total CPU usage. This means that a load of 1.5 on a 2 core cpu
+    will actually return 0.75.
     """
     from subprocess import check_output
 

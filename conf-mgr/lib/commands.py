@@ -44,10 +44,10 @@ class ListenableConfiguredAMP(ConfiguredCommandAMP):
                  start=(lambda self, box_sender: None),
                  stop=(lambda self, reason: None)):
         """
-        :param start: A function handle that is called when a connection starts.
-        :type start: (ListenableConfiguredAMP, IBoxSender) -> None
-        :param stop: A function handle that is called when a connection stops.
-        :type stop: (ListenableConfiguredAMP, Failure) -> None
+        @param start: A function handle that is called when a connection starts.
+        @type start: function(ListenableConfiguredAMP, IBoxSender) -> None
+        @param stop: A function handle that is called when a connection stops.
+        @type stop: function(ListenableConfiguredAMP, Failure) -> None
         """
 
         self._start_receiving_listener = start
