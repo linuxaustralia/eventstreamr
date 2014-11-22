@@ -43,10 +43,10 @@ def get_factory_names():
 class RoleFactory(object):
     """
 
-    :type instances: int
-    :cvar instances: The maximum number of instances that are allowed to be running at any given time. This should
-                      not be managed through this factory as it is managed higher in the chain. Set to 0 or less for
-                      any number of instances running at a given time.
+    @cvar instances: The maximum number of instances that are allowed to be running at any given
+                     time. This should not be managed through this factory as it is managed
+                     higher in the chain. Set to 0 or less for any number of instances running at
+                     a given time.
     """
 
     instances = 0
@@ -57,8 +57,8 @@ class RoleFactory(object):
     def makeService(self, uuid, given_config):
         """
         Start a new implementation of the role using given_config to configure it.
-        This method should create a new role with the given configuration. If this method is unable to make a role
-        using the given configuration then it should throw an exception.
+        This method should create a new role with the given configuration. If this method is
+        unable to make a role using the given configuration then it should throw an exception.
 
         This method's default operation is to create an instance using `build` and then configure it using
         `Role.update`.
@@ -131,8 +131,6 @@ class WatchdogRole(Role, PollingCommandServiceMixin):
             self.log.cmd_output_stderr(data)
         except NameError:
             pass
-
-# TODO make this a function that doesn't get called when testing ect.
 
 
 def __check_load():
