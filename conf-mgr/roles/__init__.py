@@ -12,7 +12,8 @@ from twisted.application.service import MultiService
 from lib.logging import getLogger
 from lib.amp.mixins import PollingCommandServiceMixin
 
-__factories__ = {}
+__factories = {}
+__loaded_roles = []
 
 log = getLogger(["roles-init"])
 
@@ -20,7 +21,7 @@ log = getLogger(["roles-init"])
 def register_factory(name, factory):
     """Register the given factory as the given name. The factory object should be an initialised RoleFactory."""
     log.msg("Registering %s with the given factory: %r" % (name, factory))
-    __factories__[name] = factory
+    __factories[name] = factory
 
 
 def get_factory(name):
@@ -29,12 +30,14 @@ def get_factory(name):
 
     :rtype: RoleFactory
     """
-    return __factories__.get(name, None)
+    __check_load()
+    return __factories.get(name, None)
 
 
 def get_factory_names():
     """Get the names of all the factories registered."""
-    return __factories__.iterkeys()
+    __check_load()
+    return __factories.iterkeys()
 
 
 class RoleFactory(object):
@@ -131,13 +134,18 @@ class WatchdogRole(Role, PollingCommandServiceMixin):
 
 # TODO make this a function that doesn't get called when testing ect.
 
-loaded = []
-for importer, module_name, is_pkg in _pkgutil.iter_modules(__path__):
-    if not is_pkg and importer is not None:
-        log.msg("Loading `%s` module ..." % module_name)
-        __import__("%s.%s" % (__name__, module_name))
-        log.msg("Loaded `%s` module." % module_name)
-        loaded.append(module_name)
 
-log.msg("Loaded the following modules: %r" % loaded)
-del loaded
+def __check_load():
+    if __loaded_roles:
+        return
+    __loaded_roles.append("Hello") # Prevent recursive call.
+    loaded = []
+    for importer, module_name, is_pkg in _pkgutil.iter_modules(__path__):
+        if not is_pkg and importer is not None:
+            log.msg("Loading `%s` module ..." % module_name)
+            __import__("%s.%s" % (__name__, module_name))
+            log.msg("Loaded `%s` module." % module_name)
+            loaded.append(module_name)
+
+    log.msg("Loaded the following modules: %r" % loaded)
+    del loaded
