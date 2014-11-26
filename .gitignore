@@ -6,4 +6,5 @@ conf-mgr/station-logs
 conf-mgr/station.json
 conf-mgr/station_config.json
 conf-mgr/manager.json
+conf-mgr/apidocs
 schedule.json
