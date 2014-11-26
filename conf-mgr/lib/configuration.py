@@ -69,7 +69,7 @@ class ConfigurationManager(MultiService, Observable):
             self._notify_observers(self, service_name)
 
 
-class ServiceConfigurationWrapper(Observable, object):
+class ServiceConfigurationWrapper(AbstractPriorityDictionary, Observable):
 
     def __init__(self, config_manager, service_name):
         super(ServiceConfigurationWrapper, self).__init__()
@@ -91,45 +91,3 @@ class ServiceConfigurationWrapper(Observable, object):
         return map(lambda v: v["config"],
                    sorted(self.service_config().values(),
                           reverse=True, key=lambda v: v["priority"]))
-
-    def get(self, key, default=None):
-        cfgs = self.ordered_configs()
-        for cfg in cfgs:
-            if key in cfg:
-                return cfg[key]
-        return default
-
-    def __getitem__(self, key):
-        cfgs = self.ordered_configs()
-        for cfg in cfgs:
-            if key in cfg:
-                return cfg[key]
-        raise KeyError("Missing %r" % key)
-
-    def keys(self):
-        cfgs = self.ordered_configs()
-        keys = set()
-        for cfg in cfgs:
-            keys.update(cfg.keys())
-        return keys
-
-    def __iter__(self):
-        return iter(self.keys())
-
-    def __len__(self):
-        return len(self.keys())
-
-    def __contains__(self, key):
-        cfgs = self.ordered_configs()
-        for cfg in cfgs:
-            if key in cfg:
-                return True
-        return False
-
-    def all(self, key):
-        values = []
-        cfgs = self.ordered_configs()
-        for cfg in cfgs:
-            if key in cfg:
-                values.append(cfg[key])
-        return values
