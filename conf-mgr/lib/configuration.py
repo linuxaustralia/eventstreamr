@@ -1,22 +1,30 @@
-from collections import OrderedDict
 from lib.logging import getLogger
+from lib.utils import Observable, AbstractPriorityDictionary
 from twisted.application.service import MultiService
-from lib.utils import Observable
 
 _log = getLogger(("lib", "configuratuion", "__init__"))
 
 
-class ConfigurationManager(MultiService, Observable):
+class ConfigurationManager(Observable):
     """
     This object manages sotring and accessing configurations.
 
-    This object stores individual configurations on a 2-level hierarchy and enables the configurations to be ordered using an arbitary priority system.
+    This object stores individual configurations on a 2-level hierarchy and enables the
+    configurations to be ordered using an arbitary priority system.
 
-    The 2 levels are named C{service_name} and C{source_name} to represent the service and the source of the configuration respectively. All configurations under a common `service_name` are agregated using the L{ServiceConfigurationWrapper} which allows for easy access to individual configuration items.
+    The 2 levels are named C{service_name} and C{source_name} to represent the service and the
+    source of the configuration respectively. All configurations under a common `service_name` are
+    agregated using the L{ServiceConfigurationWrapper} which allows for easy access to individual
+    configuration items.
 
-    The priority given to C{set_config} is taken to mean that the larger(numerically) the number, the more important it is. So in the case where 2 configurations provide the same key; the configuration with the larger priority number will be used.
+    The priority given to C{set_config} is taken to mean that the larger(numerically) the number,
+    the more important it is. So in the case where 2 configurations provide the same key; the
+    configuration with the larger priority number will be used.
 
-    All observers will be called with 2 parameters; this object and the service name that was updated. Note that it is possible that when an event is fired, the end-user data has not changed. For example removing a non-existant source will fire an event without the configuration being changed.
+    All observers will be called with 2 parameters; this object and the service name that was
+    updated. Note that it is possible that when an event is fired, the end-user data has not
+    changed. For example removing a non-existant source will fire an event without the configuration
+    being changed.
 
     @ivar configs: A C{dict} storing all the configurations.
     """
@@ -36,7 +44,9 @@ class ConfigurationManager(MultiService, Observable):
         """
         Assigns the given configuration to the service's configuration.
 
-        If there is an existing (C{service_name}, C{source_name}) pair then it will be overwritten with the values given. The source name can be reused over multiple service names without any ill effects.
+        If there is an existing (C{service_name}, C{source_name}) pair then it will be overwritten
+        with the values given. The source name can be reused over multiple service names without
+        any ill effects.
 
         @param service_name: The name of the service.
         @param source_name: The name of the source.
@@ -52,10 +62,13 @@ class ConfigurationManager(MultiService, Observable):
         """
         Assigns the given configuration to the service's configuration.
 
-        If there is an existing (C{service_name}, C{source_name}) pair then it will be overwritten with the values given. The source name can be reused over multiple service names without any ill effects.
+        If there is an existing (C{service_name}, C{source_name}) pair then it will be overwritten
+        with the values given. The source name can be reused over multiple service names without
+        any ill effects.
 
         @param service_name: The name of the service.
-        @return: A read only dictionary like object that manages retrieving the configuration in a transparent manner.
+        @return: A read only dictionary like object that manages retrieving the configuration in a
+        transparent manner.
         @rtype: L{ServiceConfigurationWrapper}
         """
         return ServiceConfigurationWrapper(self, service_name)
