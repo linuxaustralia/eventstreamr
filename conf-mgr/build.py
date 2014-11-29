@@ -14,7 +14,12 @@ def main():
     if "lint" in sys.argv:
         subprocess.call(["flake8", "--statistics", "lib", "roles", "scripts"])
     if "test" in sys.argv:
-        subprocess.call(["python", "-m", "unittest", "discover"])
+        subprocess.call(["python", "-tt", "-B", "-m", "unittest", "discover"])
+    if "tidy" in sys.argv:
+        # Not lists because running in shell.
+        subprocess.call(["rm **/**.pyc"], shell=True)
+        subprocess.call(["rm **/.DS_Store"], shell=True)
+        subprocess.call(["rm", "-rf", "logs", "logs-temp"])
 
 
 
