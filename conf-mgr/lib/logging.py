@@ -1,19 +1,21 @@
-__author__ = 'lee'
-__doc__ = """
-This file will contain a lightweight wrapper around `twisted.python.log` to make certain kinds of logging easier and
-also allow pre-definition of extra content. This is in preparation for the move to transmitting station logs to the
-manager.
+#!
+
+"""
+This file will contain a lightweight wrapper around C{twisted.python.log} to make certain kinds of
+logging easier and also allow pre-definition of extra content. This is in preparation for the move
+to transmitting station logs to the manager.
 
 This will provide a class that allows:
- - Debug messages that are only output when the `PRODUCTION` environment variable is not set.
+ - Debug messages that are only output when the C{PRODUCTION} environment variable is not set.
  - Simpler logging of error messages
  - The definition of logging location at creation instead of at every log call.
 
-All of these will simply call onto `twisted.python.log` as necessary
+All of these will simply call onto C{twisted.python.log} as necessary
 
-It will also be a drop in replace for `from twisted.python import log` by providing a base log instance which can be
-imported as: `from lib.logging import log` without any code being changed.
+It will also be a drop in replace for C{from twisted.python import log} by providing a base log
+instance which can be imported as: C{from lib.logging import log} without any code being changed.
 """
+
 from time import strftime, gmtime, time
 import string
 import random
@@ -37,13 +39,18 @@ _logging_commands = configuration_helper("Station Logging")
 
 @_logging_commands.command
 class SendLogsCommand(amp.Command):
+    """
 
+    """
     arguments = [("logs", amp.Object()),
                  ("transport", amp.Transport())]
     response = [("accepted", amp.Boolean())]
 
 
 class Logger(LogPublisher):
+    """
+    Logger.
+    """
 
     def __init__(self, location=("general",), transmit=False):
         self.location = location
@@ -84,10 +91,10 @@ class Logger(LogPublisher):
         positionally, not by keyword.
 
         @param _stuff: The failure to log.  If C{_stuff} is C{None} a new
-            L{Failure} will be created from the current exception state.  If
-            C{_stuff} is an C{Exception} instance it will be wrapped in a
-            L{Failure}.
-        @type _stuff: C{NoneType}, C{Exception}, or L{Failure}.
+            L{Failure<twisted.python.failure.Failure>} will be created from the current exception
+            state.  If C{_stuff} is an C{Exception} instance it will be wrapped in a
+            C{Failure}.
+        @type _stuff: C{NoneType}, C{Exception}, or L{Failure<twisted.python.failure.Failure>}.
 
         @param _why: The source of this failure.  This will be logged along with
             C{_stuff} and should describe the context in which the failure
@@ -105,8 +112,12 @@ class Logger(LogPublisher):
 
 
 class LogTransmissionService(Service):
+    """
+    Transmission Service.
+    """
 
-    def __init__(self):
+
+    def __init__(self, ):
         self.__temporary_log_location = "logs-temp/"
         self.__extension = "-tmp.log"
         self.__remote_connection = None
@@ -121,14 +132,16 @@ class LogTransmissionService(Service):
     @remote_connection.setter
     def remote_connection(self, new_connection):
         if self.running:
+            # TODO safely restart the service with new connection.
             raise Exception("Running")
         else:
             self.__remote_connection = new_connection
             if new_connection:
                 # I've got a new connection so schedule the sending of all the logs.
-                reactor.callLater(0, self.send_logs)
+                schedule_pending(now=True)
 
-    def get_current_fd(self):
+    @property
+    def current_fd(self):
         if self.__current_fd is None or self.__current_fd.closed:
             if self.__current_file is None:
                 self.rotate(None)
@@ -154,8 +167,8 @@ class LogTransmissionService(Service):
     @temporary_log_location.setter
     def temporary_log_location(self, new_location):
         if self.running:
-            raise Exception("Service is running so I can't change the location. Please stop the service before "
-                            "changing the location")
+            raise Exception("Service is running so I can't change the location. Please stop the"
+                            " service before changing the location")
         else:
             self.__temporary_log_location = new_location
 
@@ -169,18 +182,27 @@ class LogTransmissionService(Service):
 
     def write_entry(self, location, log_time, entry):
         location_string = "|".join(location)
-        self.get_current_fd().write("%f:%s:%s\0" % (log_time, location_string, entry.replace("\0", "\\0")))
-        self.get_current_fd().flush()
+        self.current_fd.write("%f:%s:%s\0" %
+                                (log_time, location_string, entry.replace("\0", "\\0")))
+        self.current_fd.flush()
+        self.schedule_pending()
 
-        if not self.pending:
-            self.pending = reactor.callLater(random.uniform(2, 10), self.do_pending)
+    def schedule_pending(self, now=False):
+        if not self.pending or not self.pending.active():
+            if now:
+                self.pending = reactor.callLater(0, self.do_pending)
+            else:
+                self.pending = reactor.callLater(random.uniform(2, 10), self.do_pending)
+        elif now:
+            # Reschedule the call to ASAP.
+            self.pending.reset(0)
 
     def do_pending(self):
         self.pending = None
         try:
             self.send_logs()
         except:
-            self.pending = reactor.callLater(random.uniform(2, 10), self.do_pending)
+            self.schedule_pending()
             raise
 
     def send_logs(self):
@@ -226,7 +248,7 @@ class LogTransmissionService(Service):
                 self.__current_file = f
                 self.__current_fd = open(f, "w")
             else:
-                raise Exception("This time(%s) has already come? Inconceivable." % f)
+                raise Exception("The file(%s) already exists. This should never occour" % f)
 
 
 class LogObserver(object):
@@ -271,13 +293,12 @@ class LogObserver(object):
         if event.get("isError", False):
             out = _stderr
 
-        lines = ["%s %s -> %s\n" % (prefix, log_time_str, ">".join(location))] + \
-                ["\t|%s\t%s\n" % (prefix, l) for l in entry_text.splitlines()]
+        lines = (["%s %s -> %s\n" % (prefix, log_time_str, ">".join(location))] +
+                ["\t|%s\t%s\n" % (prefix, l) for l in entry_text.splitlines()])
 
-        out.writelines(
-            lines
-        )
+        out.writelines(lines)
         out.flush()
+
 
 
 def build_file(folder, paths, extension):
@@ -313,11 +334,11 @@ def emmit(event):
 def emmit_to_term(event):
     observer.print_to_sys(event)
 
-def getLogger(location, transmit_=None):
-    if transmit_ is None:
-        transmit_ = transmit
+def getLogger(location, _transmit=None):
+    if _transmit is None:
+        _transmit = transmit
     loc = [str(e) for e in location]
-    l = Logger(location=loc, transmit=transmit_)
+    l = Logger(location=loc, transmit=_transmit)
     l.addObserver(emmit)
     l.addObserver(emmit_to_term)
     return l

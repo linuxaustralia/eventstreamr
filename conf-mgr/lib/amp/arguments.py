@@ -1,4 +1,8 @@
-__author__ = 'Lee Symes'
+"""
+This module provides additional argument types.
+
+This also provides all the existing argument types provided by twisted.
+"""
 
 import pickle as _pickle
 from StringIO import StringIO as _StringIO
@@ -11,42 +15,68 @@ from twisted.protocols.amp import Integer, Float, Boolean, Unicode, Path, Comman
 CHUNK_MAX = 0xffff
 
 
-class Transport(_Argument):
-    optional = True  # No need to put this as an argument when calling.
+class Transport(_Argument, object):
+    """
+    An AMP argument that provides the C{transport} object to the reciever.
+
+    The parameter does not need to be specified when called as it has no meaning to the sender.
+    """
+
 
     def __init__(self):
-        _Argument.__init__(self, optional=True)
+        super(Transport, self).__init__(optional=True)
+
 
     def fromBox(self, name, strings, objects, proto):
+        """
+        Populates the argument with the C{transport}.
+        """
         objects[name] = proto.transport  # The object will be filled in here
 
+
     def toBox(self, name, strings, objects, proto):
+        """
+        Ignore any argument given and transmit an empty string.
+        """
         strings[name] = ""  # The object will be filled in on the other end.
+
 
 
 class BoxSender(_Argument):
-    optional = True  # No need to put this as an argument when calling.
+    """
+    An AMP argument that provides the C{boxSender} object to the reciever.
+
+    The parameter does not need to be specified when called as it has no meaning to the sender.
+    """
+
 
     def __init__(self):
         _Argument.__init__(self, optional=True)
 
+
     def fromBox(self, name, strings, objects, proto):
+        """
+        Populates the argument with the C{boxSender}.
+        """
         objects[name] = proto.boxSender  # The object will be filled in here
 
+
     def toBox(self, name, strings, objects, proto):
+        """
+        Ignore any argument given and transmit an empty string.
+        """
         strings[name] = ""  # The object will be filled in on the other end.
+
 
 
 class BigString(_Argument):
     """
-    Encodes an arbitrarily large chunk of data by dynamically adding key/value
-    pairs to the AMP Command packet. This is not a standard encoding scheme.
-
-    This is little more than a hack, and services no purpose save convenience
-    for some simple applications.
+    Encodes an arbitrarily large string for transmission.
 
     This is taken from http://amp-protocol.net/Types/BigString/
     """
+
+
     def fromBox(self, name, strings, objects, proto):
         value = _StringIO()
         value.write(strings.get(name))
@@ -57,8 +87,13 @@ class BigString(_Argument):
             value.write(chunk)
         objects[name] = self.build_value(value.getvalue())
 
+
     def build_value(self, value):
+        """
+        Converts the recieved string to another type if required.
+        """
         return value
+
 
     def toBox(self, name, strings, objects, proto):
         value = _StringIO(self.from_value(objects[name]))
@@ -72,34 +107,47 @@ class BigString(_Argument):
             strings["%s.%d" % (name, counter)] = next_chunk
             counter += 1
 
+
     def from_value(self, value):
+        """
+        Converts the value to be sent to a string for transmission.
+        """
         return value
+
 
 
 class BigUnicode(BigString):
     """
-    Encodes an arbitrarily large chunk of data by dynamically adding key/value
-    pairs to the AMP Command packet. This is not a standard encoding scheme.
-
-    This is little more than a hack, and services no purpose save convenience
-    for some simple applications.
-
-    This is taken from http://amp-protocol.net/Types/BigString/
+    Encodes an arbitrarily large unicode string for transmission over the network.
     """
+
+
     def build_value(self, value):
         return value.decode('utf-8')
+
 
     def from_value(self, value):
         return value.encode('utf-8')
 
 
+
 class Object(BigUnicode):
+    """
+    An Argument that allows the sending of most python objects.
+
+    This uses L{pickle} to convert the object from the sender to a string, then the reciever
+    converts the string back to an object.
+    """
+
 
     def build_value(self, value):
         return _pickle.loads(BigUnicode.build_value(self, value))
 
+
     def from_value(self, value):
         return BigUnicode.from_value(self, _pickle.dumps(value))
 
-__all__ = ["BigString", "BigUnicode", "Boolean", "BoxSender", "Command", "Float", "Integer", "Object", "Path",
-           "String", "Transport", "Unicode"]
+
+
+__all__ = ["BigString", "BigUnicode", "Boolean", "BoxSender", "Command", "Float", "Integer",
+            "Object", "Path", "String", "Transport", "Unicode"]

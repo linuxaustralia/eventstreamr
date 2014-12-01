@@ -20,14 +20,16 @@ def load_folder(testcase, root, pkg):
 
 
 
-
 class ImportingModulesTest(lh.LoggingTestCase):
+
 
     def setUp(self):
         self.root = p.abspath(".")
 
+
     def test_lib(self):
         load_folder(self, self.root, "lib")
+
 
     def test_roles(self):
         load_folder(self, self.root, "roles")
