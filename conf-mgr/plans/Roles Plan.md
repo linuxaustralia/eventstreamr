@@ -18,4 +18,5 @@ will start up the role when a configuration for that role appears.
 
 ## -- ##
 
-In my opinion, option 1 will be easier to implement, however will make the role implementation harder.
+In my opinion, option 1 will be easier to implement, however will make the role implementation
+harder.

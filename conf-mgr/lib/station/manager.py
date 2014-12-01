@@ -5,7 +5,7 @@ from twisted.internet.defer import DeferredList, maybeDeferred
 
 from lib.exceptions import InvalidConfigurationException, BlockedRoleException, MissingRoleFactoryException
 from lib.logging import getLogger
-from roles import get_factory, get_factory_names
+# from roles import get_factory, get_factory_names
 
 log = getLogger(["lib", "station", "manager"])
 
@@ -76,7 +76,8 @@ class AllRolesManagerService(NamedMultiService):
         This method also outputs descriptive information about each invalid role to the logger defined for this module.
         """
         new_roles = set(roles.iterkeys())
-        factories = set(get_factory_names())
+        # factories = set(get_factory_names())
+        factories = set()
         blocked_roles = self.blocked_roles.intersection(new_roles)
         if blocked_roles:
             log.warning("The station was requested to run a role it is blocked from running.")
@@ -106,11 +107,18 @@ class RoleManagerService(NamedMultiService):
     an implementation of the same role.
     """
 
+
     def __init__(self, name):
         NamedMultiService.__init__(self)
         self.setName(name)
 
-    factory = property(lambda self: get_factory(self.name), doc="Returns the factory object for the given role.")
+
+    @property
+    def factory(self):
+        """Returns the factory object for the given role."""
+        # return get_factory(self.name)
+        return set()
+
 
     def update_config(self, mapped_config):
         try:

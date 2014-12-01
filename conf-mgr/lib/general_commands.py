@@ -7,6 +7,8 @@ from lib.amp import arguments as amp_args
 from lib.commands import configuration_helper
 
 
+# TODO rename this stuff.
+
 manager_commands = configuration_helper("manager")
 station_commands = configuration_helper("station")
 
@@ -16,7 +18,3 @@ class RegisterStationCommand(amp.Command):
                  ('transport', amp_args.Transport()),
                  ('box_sender', amp_args.BoxSender())]
     response = []
-
-
-
-
