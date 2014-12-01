@@ -34,7 +34,7 @@ Logging Timeline
  3. Now if `transmit` is not true(i.e. false or missing) the observer returns. Otherwise passes the message onto the transmission service.
  4. The transmission service now saves the log information into a temporary 'queue' file. This file is named as the date/time is it created.
  5. The transmission service now schedules a log transmission in a random number of seconds(between 2 and 10 seconds). This completes the actions that block the original log. For the transmission see below.
- 
+
 Logging Transmission Timeline
 -----------------------------
 
@@ -42,7 +42,7 @@ This is likely called after a delay when a message is sent to the logger. It can
 
  1. The queue is 'rotated'(This is blocking so will not allow any logs through in the process):
     1. The current queue file is closed.
-    2. The new queue file is created and opened for reading. 
+    2. The new queue file is created and opened for reading.
     3. This file is now set to be the current queue
  2. The old queue is now read completely and converted(see below for the queue file format) ready for sending.
  3. The log entries are sent to the manager.
@@ -76,17 +76,17 @@ Things To Do
 
  - Figure out how to do no.2 whilst keeping the `log_location` information.
 
-    - **Cunning Plan:** Change the sent information to be a list of log entries with a tuple containing 
-      
+    - **Cunning Plan:** Change the sent information to be a list of log entries with a tuple containing
+
       ```
       (log_location, log_data, update_time)
       ```
-      
+
       Or more fully:
       **Sent Information:**
-      
+
       ```
       logs (Object) -> [(<<Millis>>, [<<Log Location>>], "<<Raw Log Entry Here>>"), ...]
       ```
-      
+
       Once the station receives the response, it can just clear or delete the file and switch over to the other one. This could mean that this simply runs as a polling job where it switches the log files and sends them every minute. And then add an extra handle so if a major error occurs the logs are sent.
