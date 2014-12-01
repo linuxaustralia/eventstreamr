@@ -9,11 +9,20 @@ Welcome to PyCon Conference Manager's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 10
+    :titlesonly:
 
-   modules/index.rst
-   tutorials/index.rst
+    modules/index
+    tutorials/index
 
+
+
+.. todo::
+    Patch or report an issue with the coverage module. Currently this module only produces
+    :code:`.txt` files. This should be configurable so that other file types can be specified.
+
+.. todo::
+    Write or find a module that supports linking to external PyDoctor documentation. Use this to
+    replace the slight hack for :code:`:twisted:`
 
 
 
@@ -23,3 +32,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+* :ref:`todos`

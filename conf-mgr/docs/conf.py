@@ -32,6 +32,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
+    'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
@@ -267,6 +268,11 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
+
+extlinks = {
+    'twisted': ('https://twistedmatrix.com/documents/current/api/twisted.%s.html', 'twisted.')
+}
+
 intersphinx_mapping = {
     "python": ('http://docs.python.org/2', None),
     "twisted": ('http://twistedmatrix.com/documents/current/', None)
@@ -275,3 +281,5 @@ intersphinx_mapping = {
 epydoc_mapping = {
     "https://twistedmatrix.com/documents/current/api/": [r'twisted(\.|$)']
 }
+
+todo_include_todos = True

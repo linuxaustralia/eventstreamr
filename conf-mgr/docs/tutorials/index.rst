@@ -3,11 +3,18 @@
 Basic Tutorials
 ===============
 
-TODO: Provide a nice description of the API.
+.. todo::
+
+    Write a nice introduction piece on the software.
+
+.. todo::
+
+    Write more tutorials as I find stuff that works or doesn't.
+
 
 .. toctree::
     :maxdepth: 10
 
+    running.rst
     new_role.rst
     commands.rst
-    running.rst

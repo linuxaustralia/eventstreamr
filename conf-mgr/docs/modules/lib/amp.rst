@@ -17,12 +17,20 @@ The arguments defined here can be used to create new commands. To find out more 
 
 .. note::
 
-    This module can be included in place of :mod:`twisted.protocols.amp`
+    This module can be included in place of :twisted:`protocols.amp`
 
 Arguments
 ~~~~~~~~~
 
 Most :class:`Argument` subclasses accept a :code:`optional` argument to thier constructor. The arguments will error when an invalid type is provided and in the process prevent the command from being sent. If the type is unknown then use an :class:`Object` as it does not perform type checks.
+
+.. todo::
+
+    Figure out the difference between :class:`BoxSender` and :class:`Transport`.
+
+.. todo::
+
+    Figure out if the two seperate classes(:class:`BoxSender` and :class:`Transport`) are strictly required.
 
 .. class:: BigString(optional=False)
 
@@ -43,7 +51,7 @@ Most :class:`Argument` subclasses accept a :code:`optional` argument to thier co
 
     An argument that automatically fills in the sender's information for the reciever.
 
-    This argument is a :class:`twisted.protocols.amp.BoxDispatcher`; it allows access to :code:`callRemote` which can allow for a callback to send more calls to the sender.
+    This argument is a :twisted:`protocols.amp.BoxDispatcher`; it allows access to :code:`callRemote` which can allow for a callback to send more calls to the sender.
 
     This is used in :mod:`manager` to update the configuration when a new station connects.
 
@@ -67,7 +75,7 @@ Most :class:`Argument` subclasses accept a :code:`optional` argument to thier co
 
 .. class:: Path(optional=False)
 
-    An argument that accepts a :class:`twisted.python.filepath.FilePath` object.
+    An argument that accepts a :twisted:`python.filepath.FilePath` object.
 
 .. class:: String(optional=False)
 
