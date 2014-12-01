@@ -9,7 +9,11 @@ Welcome to PyCon Conference Manager's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 10
+
+   modules/index.rst
+   tutorials/index.rst
+
 
 
 
@@ -19,4 +23,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
