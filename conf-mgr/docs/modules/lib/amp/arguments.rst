@@ -1,14 +1,5 @@
-:mod:`lib.amp` --- An extension of Twisted's AMP Implementaion
-==============================================================
-
-.. module:: lib.amp
-
-
-This package provides extensions for Twisted's AMP API. These include more flexible arguments and
-an API to dynamically enable and disable commands.
-
 :mod:`lib.amp.arguments` --- Additional argument types
-------------------------------------------------------
+======================================================
 
 .. module:: lib.amp.arguments
     :synopsis: AMP Argument types.
@@ -20,7 +11,7 @@ The arguments defined here can be used to create new commands. To find out more 
     This module can be included in place of :twisted:`protocols.amp`
 
 Arguments
-~~~~~~~~~
+---------
 
 Most :class:`Argument` subclasses accept a :code:`optional` argument to thier constructor. The arguments will error when an invalid type is provided and in the process prevent the command from being sent. If the type is unknown then use an :class:`Object` as it does not perform type checks.
 
@@ -32,16 +23,13 @@ Most :class:`Argument` subclasses accept a :code:`optional` argument to thier co
 
     Figure out if the two seperate classes(:class:`BoxSender` and :class:`Transport`) are strictly required.
 
-.. class:: BigString(optional=False)
+.. class::  BigString(optional=False)
+            BigUnicode(optional=False)
 
-    An argument that accepts an arbitary length ASCII string.
+    An argument that accepts an arbitary length ASCII/Unicode string.
 
     .. note::
-        It is better to use :class:`BigUnicode` as unicode support is built-in.
-
-.. class:: BigUnicode(optional=False)
-
-    An argument that accepts an arbitary length unicode string.
+        Use :class:`BigUnicode` over :class:`BigString`. This is to prevent :class:`BigString` from raising an error if the value provided is accidentaly unicode.
 
 .. class:: Boolean(optional=False)
 
@@ -77,19 +65,41 @@ Most :class:`Argument` subclasses accept a :code:`optional` argument to thier co
 
     An argument that accepts a :twisted:`python.filepath.FilePath` object.
 
-.. class:: String(optional=False)
+.. class::  String(optional=False)
+            Unicode(optional=False)
 
+    An argument that accepts a ASCII/Unicode string.
+
+    .. note::
+        This argument is length limited to the limits imposed by the `AMP protocol`_ which is 65,535 bytes. Use :class:`BigString` or :class:`BigUnicode` if the length could excede this.
 
 .. class:: Transport
 
-    An argument that
+    An argument that automatically fills in the sender's transport information for the reciever.
+
+    This is used in :mod:`manager` to update the configuration when a new station connects.
 
     .. note::
         :class:`Transport` is always optional. Any value provided is discarded prior to
         transmission.
 
-.. class:: Unicode(optional=False)
 
+Command
+-------
 
+The :class:`Command` class is defined in the :twisted:`protocols.amp` module; but made avaliable here for simplicity.
 
 .. class:: Command
+
+    Subclass this to specify a command. See the full documentation on the :twisted:`Twisted's API documentation <protocols.amp.Command>`
+
+    :cvar arguments:
+        A list of 2-tuples of (name, Argument-subclass-instance), specifying the names and values
+        of the parameters which are required for this command.
+
+    :cvar response: A list like L{arguments}, but instead used for the return value.
+
+
+.. Links ..........................................................................................
+
+.. _AMP protocol: http://amp-protocol.net

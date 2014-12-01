@@ -17,10 +17,10 @@ class InternalServiceMixin(object):
             super(..., self).__init__(self, **kwargs)
             ...
 
-    @ivar _config_mgr: A configuration manager instance which contains all the configurations.
-    @type _config_mgr: L{ConfigurationManager<lib.configuration.ConfigurationManager>}
-    @ivar _reactor: A twisted reactor instance to be used for this service. Use this over importing
-                    C{twisted.internet.reactor} as it allows for easier testing.
+    :ivar _config_mgr: A configuration manager instance which contains all the configurations.
+    :type _config_mgr: :class:`ConfigurationManager <lib.configuration.ConfigurationManager>`
+    :ivar _reactor: A twisted reactor instance to be used for this service. Use this over importing
+                    :code:`twisted.internet.reactor` as it allows for easier testing.
     """
 
 
@@ -29,8 +29,8 @@ class InternalServiceMixin(object):
         This method initilises the service with the configuration manager and reactor passed in as
         keyword args.
 
-        @param _config_mgr: The configuration manager for this service(KW args only)
-        @param _reactor: The reactor for this service(KW args only)
+        :param _config_mgr: The configuration manager for this service(KW args only)
+        :param _reactor: The reactor for this service(KW args only)
         """
         self._config_mgr = kwargs["_config_mgr"]
         self._reactor = kwargs["_reactor"]
@@ -40,12 +40,13 @@ class InternalServiceMixin(object):
     def _init_new_service(self, service_class, *args, **kwargs):
         """
         Create a new service using this service's configuration manager and reactor. Additional
-        parameters after the C{service_class} will be passed through to the class's constructor.
+        parameters after the :code:`service_class` will be passed through to the class's
+        constructor.
 
-        @param service_class: The service class to create.
-        @param *args: The positional arguments to send to the service class's constructor.
-        @param **kwargs: The keyword arguments to send to the service class's constructor. Note
-                         that C{_config_mgr} and C{_reactor} are always overwritten.
+        :param service_class: The service class to create.
+        :param \*args: The positional arguments to send to the service class's constructor.
+        :param \*\*kwargs: The keyword arguments to send to the service class's constructor. Note
+                         that :code:`_config_mgr` and :code:`_reactor` are always overwritten.
         """
         kwargs["_config_mgr"] = _config_mgr
         kwargs["_reactor"] = _reactor

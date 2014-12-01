@@ -24,7 +24,8 @@ Contents:
     Write or find a module that supports linking to external PyDoctor documentation. Use this to
     replace the slight hack for :code:`:twisted:`
 
-
+.. todo::
+    Start replacing hard-coded documentation with autodoc so that source links work out of the box.
 
 Indices and tables
 ==================
