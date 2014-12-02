@@ -56,36 +56,54 @@ class InternalServiceMixin(object):
 
 class CommandRegistrationServiceMixin(object):
     """
+    This mixin allows services to dictate the responders for a set of commands; then have them
+    automatically registered and de-registered when the service is started and stoped.
+
+    .. todo::
+        Add methods to change the command bindings on the fly.
+
+    .. todo::
+        Consider changing this to use a class variable for the :code:`responder_pairs` and then
+        binding them to :code:`self` when the service is started.
     """
 
 
-    def __init__(self, helper, *command_responder_pairs):
+    def __init__(self, helper, command_responder_pairs, *args, **kwargs):
         """
+        Simply provide the configuration helper and then a list
 
-        :param helper:
-        :type helper: lib.commands._ConfigurationHelper
-        :param command_responder_pairs:
-        :type command_responder_pairs:
-        :return:
-        :rtype:
+        :param helper: The configuration helper the commands provided are attached to.
+        :type helper: lib.commands.ConfigurationHelper
+        :param command_responder_pairs: A list of 2-tuples mapping a command to a function.
+        :type command_responder_pairs: list(tuple(Command, function))
         """
-        self.__helper = helper
-        self.__command_pairs = command_responder_pairs
+        self._helper = helper
+        self._command_pairs = command_responder_pairs
+        super(CommandRegistrationServiceMixin, self).__init__(*args, **kwargs)
 
 
     def startService(self):
-        for command, responder in self.__command_pairs:
-            self.__helper.responder(command, responder)
-        self.__helper.register()
+        """
+        Registers the command-responder pairs given in the constructor with the configuration
+        helper also given in the constructor.
+        """
+        for command, responder in self._command_pairs:
+            self._helper.responder(command, responder)
+        self._helper.register()
 
         super(CommandRegistrationServiceMixin, self).startService()
 
 
     def stopService(self):
-        for command, responder in self.__command_pairs:
-            self.__helper.remove_responder(command, responder)
+        """
+        Registers the command-responder pairs given in the constructor with the configuration
+        helper also given in the constructor.
+        """
+        for command, responder in self._command_pairs:
+            self._helper.remove_responder(command, responder)
 
         super(CommandRegistrationServiceMixin, self).stopService()
+
 
 
 # TODO rework the polling.

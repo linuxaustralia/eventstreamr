@@ -1,7 +1,7 @@
 .. _tutorials-commands:
 
 Creating and Using AMP Commands
-===============================
+###############################
 
 Network communication is performed by Twisted's AMP protocol. This protocol has been modified slightly to allow commands to be enabled and disabled programatically.
 
@@ -14,12 +14,12 @@ To make the code in this tutorial easier; the following imports are placed at th
 .. _commands-defining:
 
 Defining a Command
-------------------
+==================
 
 This will show you how to define a class using the custom API's this application provides.
 
 Defining a :meth:`configuration_helper`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------
 
 Before we can define a Command, we must first define a configuration helper. This is an object which allows commands to be enabled and disabled on the fly. To create one simply::
 
@@ -28,7 +28,7 @@ Before we can define a Command, we must first define a configuration helper. Thi
 This will create a configuration helper with the name :code:`My Role`. The name is not used anywhere except here however must be unique across the application.
 
 Defining a Command Class
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 Now that we have a command helper we can define a command. Each command is an individual class which subclasses :class:`twisted.protocols.amp.Command`. Each command should also be registered at creation with a :code:`configuration_helper`. Below is an example::
 
@@ -68,4 +68,15 @@ To see the common arguments, see :mod:`lib.amp.arguments`
 
 .. note::
 
-    The names for the arguments and responses will be used inside the python code. For ease of implementation, the names should be valid python variable names, however if :code:`**kwargs` is used; then the names can be anything.
+    The names designated in command class will be used as the keywords for a call to the implementation's callback.
+
+    **For ease of implementation**\: the names should be valid python variable names.
+
+Responding to a command
+=======================
+
+
+.. _responding_to_command-service:
+
+Responding to a command --- as a Service
+========================================
