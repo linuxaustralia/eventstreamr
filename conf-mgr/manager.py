@@ -12,7 +12,6 @@ from twisted.protocols.amp import AMP
 
 from lib import general_commands
 from lib.commands import ListenableConfiguredAMP
-from lib.config import UpdateConfiguration
 from lib.exceptions import InvalidConfigurationException
 from lib.file_helper import load_json
 import lib.manager.queue
@@ -199,6 +198,3 @@ service_wrapper.setServiceParent(application)
 if __name__ == "__main__":
     print "Please run this file using the following command - It makes life easier."
     print "\ttwistd --pidfile manager.pid --nodaemon --python manager.py"
-
-
-

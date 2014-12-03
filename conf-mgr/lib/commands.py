@@ -73,7 +73,7 @@ class ListenableConfiguredAMP(ConfiguredCommandAMP):
         return r
 
 
-class _ConfigurationHelper:
+class ConfigurationHelper:
 
     def __init__(self, role_name):
         self.role_name = role_name
@@ -164,4 +164,4 @@ def configuration_helper(role_name):
     Creates a configuration helper to allow for easier configuration and registration of commands.
     :param role_name:
     """
-    return _ConfigurationHelper(role_name)
+    return ConfigurationHelper(role_name)
