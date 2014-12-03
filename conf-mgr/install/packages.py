@@ -17,6 +17,8 @@ def install_apt_packages():
 
 def install_pip_packages():
   pip_packages = ["Twisted"]
+  pip_packages = pip_packages + ["Sphinx"] # Documentation.
+
   if which("pip"):
     if 0 != subprocess.call(["pip", "install"] + pip_packages):
       exit("pip install of the following packages failed:\n\t" +

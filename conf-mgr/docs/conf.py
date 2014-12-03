@@ -283,3 +283,5 @@ epydoc_mapping = {
 }
 
 todo_include_todos = True
+
+autodoc_member_order = 'bysource'
