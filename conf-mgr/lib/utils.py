@@ -28,7 +28,7 @@ class AbstractPriorityDictionary(Mapping):
         return "%s(%r, %r)" % (self.__class__.__name__, self.config_manager, self.service_name)
 
     @abstractmethod
-    def ordered_configs(self):
+    def _ordered_configs(self):
         """
         This should return an C{list}-like object containing C{dict}-like objects from which the
         key/value pairs for this dictionary are taken.
@@ -80,5 +80,5 @@ class PrioritySubDictionary(AbstractPriorityDictionary):
         self.parent = parent_dict
         self.key = key
 
-    def ordered_configs(self):
+    def _ordered_configs(self):
         return self.parent.all(self.key)

@@ -8,3 +8,5 @@ Contents:
     :numbered:
 
     amp/index
+    configuration
+    utils

@@ -70,7 +70,7 @@ To see the common arguments, see :mod:`lib.amp.arguments`
 
     The names designated in command class will be used as the keywords for a call to the implementation's callback.
 
-    **For ease of implementation**\: the names should be valid python variable names.
+    **For ease of implementation**\: The names should be valid python variable names.
 
 Responding to a command
 =======================
