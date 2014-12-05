@@ -1,9 +1,17 @@
 #! /bin/bash
 
+OLDPWD=$(pwd)
+
 SOURCE=${BASH_SOURCE[0]}
+
+if [[ "XX$SOURCE" = "XX" ]]; then
+    SOURCE=$0
+fi
+
 DIR=$( cd "$( dirname "$SOURCE" )" && pwd )
-VENV_DIR=venv
+VENV_DIR=$DIR/venv
 cd "$DIR"
+
 
 function missing() {
     hash $1 2>/dev/null
@@ -15,8 +23,13 @@ function missing() {
     fi
 }
 
+if missing pip; then
+    echo "Please install pip before running this."
+    return
+fi
 
-if missing "virtualenv"; then
+
+if missing virtualenv; then
     # Virtual environment install.
     pip install virtualenv
 fi
@@ -28,24 +41,28 @@ if [ ! -d "$VENV_DIR" ]; then
 fi
 
 if [[ $VIRUTAL_ENV != $DIR* ]]; then
+    # Activate if not already active.
     source $VENV_DIR/bin/activate >/dev/null 2>&1
 fi
 
-if missing twistd ; then
+# `pip show` outputs nothing if the package is not installed.
+if [[ `pip show twisted` == "" ]]; then
     pip install twisted
 fi
 
-if missing sphinx-build ; then
+if [[ `pip show sphinx` == "" ]]; then
     pip install sphinx
 fi
 
+# Return to old directory.
+cd $OLDPWD
 
-
-echo "Virtual Environment all configured. Now run the following to activate it:"
+echo "Virtual Environment all configured."
+# echo " If this was run using source; then everything is ready."
+# echo ""
+# echo "      source $0"
+# echo ""
+echo "To deactivate run"
 echo ""
-echo "      source $VENV_DIR/bin/activate"
-echo ""
-echo "Or run the whole thing in one command:"
-echo ""
-echo "      source $0"
+echo "      deactivate"
 echo ""
