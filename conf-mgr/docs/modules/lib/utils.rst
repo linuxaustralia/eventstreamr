@@ -1,5 +1,5 @@
-:mod:`lib.utils`
-======================================================
+:mod:`lib.utils` --- Utility classes
+====================================
 
 .. module:: lib.utils
     :synopsis: General utility classes
@@ -11,9 +11,7 @@ Concrete Classes
 .. currentmodule:: lib.utils
 
 .. autoclass:: PrioritySubDictionary
-    :members:
-    :undoc-members:
-    :show-inheritance:
+
 
 
 Abstract Classes
@@ -22,17 +20,19 @@ Abstract Classes
 .. currentmodule:: lib.utils
 
 .. autoclass:: Observable
-    :members: add_observer, remove_observer, _notify_observers
-    :undoc-members:
+
+    .. automethod:: add_observer
+
+    .. automethod:: remove_observer
+
+    .. automethod:: _notify_observers
+
 
 .. autoclass:: AbstractPriorityDictionary
 
     .. seealso::
         This module includes :class:`collections.Mapping` and this provides additional
         functionality.
-
-    .. todo::
-        Documenting this.
 
     .. automethod:: _ordered_configs
 

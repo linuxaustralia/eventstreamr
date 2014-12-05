@@ -17,7 +17,7 @@ CHUNK_MAX = 0xffff
 
 class Transport(_Argument, object):
     """
-    An AMP argument that provides the C{transport} object to the reciever.
+    An AMP argument that provides the :code:`transport` object to the reciever.
 
     The parameter does not need to be specified when called as it has no meaning to the sender.
     """
@@ -29,7 +29,7 @@ class Transport(_Argument, object):
 
     def fromBox(self, name, strings, objects, proto):
         """
-        Populates the argument with the C{transport}.
+        Populates the argument with the :code:`transport`.
         """
         objects[name] = proto.transport  # The object will be filled in here
 
@@ -44,7 +44,7 @@ class Transport(_Argument, object):
 
 class BoxSender(_Argument):
     """
-    An AMP argument that provides the C{boxSender} object to the reciever.
+    An AMP argument that provides the :code:`boxSender` object to the reciever.
 
     The parameter does not need to be specified when called as it has no meaning to the sender.
     """
@@ -56,7 +56,7 @@ class BoxSender(_Argument):
 
     def fromBox(self, name, strings, objects, proto):
         """
-        Populates the argument with the C{boxSender}.
+        Populates the argument with the :code:`boxSender`.
         """
         objects[name] = proto.boxSender  # The object will be filled in here
 
