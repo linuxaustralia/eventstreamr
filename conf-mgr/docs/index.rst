@@ -6,6 +6,10 @@
 Welcome to PyCon Conference Manager's documentation!
 ====================================================
 
+.. image:: https://readthedocs.org/projects/eventstreamr/badge/?version=latest
+    :target: https://readthedocs.org/projects/eventstreamr/?badge=latest
+    :alt: Documentation Status
+
 Contents:
 
 .. toctree::
@@ -30,6 +34,7 @@ Contents:
 Indices and tables
 ==================
 
+* :ref:`existing-readme`
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`

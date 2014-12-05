@@ -1,8 +1,2 @@
-Jinja2==2.7.3
-MarkupSafe==0.23
-Pygments==2.0.1
-Sphinx==1.2.3
 Twisted==14.0.2
-docutils==0.12
-wsgiref==0.1.2
 zope.interface==4.1.1
