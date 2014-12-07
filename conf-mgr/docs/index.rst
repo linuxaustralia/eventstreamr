@@ -15,6 +15,7 @@ Contents:
 
     modules/index
     tutorials/index
+    plans/index
 
 
 
