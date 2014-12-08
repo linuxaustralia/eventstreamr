@@ -23,6 +23,13 @@ function missing() {
     fi
 }
 
+function install() {
+    # `pip show` outputs nothing if the package is not installed.
+    if [[ `pip show $1` == "" ]]; then
+        pip install $1
+    fi
+}
+
 if missing pip; then
     echo "Please install pip before running this."
     return
@@ -45,14 +52,10 @@ if [[ $VIRUTAL_ENV != $DIR* ]]; then
     source $VENV_DIR/bin/activate >/dev/null 2>&1
 fi
 
-# `pip show` outputs nothing if the package is not installed.
-if [[ `pip show twisted` == "" ]]; then
-    pip install twisted
-fi
-
-if [[ `pip show sphinx` == "" ]]; then
-    pip install sphinx
-fi
+install twisted
+install sphinx
+install networkx
+install matplotlib
 
 # Return to old directory.
 cd $OLDPWD
