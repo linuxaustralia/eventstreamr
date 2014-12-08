@@ -6,9 +6,6 @@ class ConfigurationManagerTestCase(unittest.TestCase):
     def setUp(self):
         self.mgr = cfg.ConfigurationManager()
 
-    def test_empty(self):
-        self.assertEqual({}, self.mgr.configs)
-
     def test_add(self):
         cfg = {"hello": 1}
         self.mgr.set_config("123", "name", 1, cfg)
@@ -33,7 +30,7 @@ class ConfigurationManagerTestCase(unittest.TestCase):
     def test_delete_service(self):
         self.mgr.set_config("123", "name", -1000, {"I don't exist":"Really"})
         self.mgr.delete_config("123")
-        self.test_empty()
+        self.assertEqual({}, self.mgr.configs)
 
     def test_delete_service_mgr(self):
         self.mgr.set_config("123", "name", -1000, {"I don't exist":"Really"})
@@ -70,7 +67,7 @@ class ServiceConfigurationWrapperTestCase(unittest.TestCase):
     def test_add_2_related_service(self):
         self.mgr.set_config("123", "name", 1, {"hello": 1, "world": 1})
         self.mgr.set_config("123", "name2", 10, {"hello": 2})
-        self.assertEqual([{'hello': 2}, {'world': 1, 'hello': 1}], self.wr.ordered_configs())
+        self.assertEqual([{'hello': 2}, {'world': 1, 'hello': 1}], self.wr._ordered_configs())
         self.assertEqual({"hello", "world"}, self.wr.keys())
         self.assertEqual(2, len(self.wr.keys()))
         self.assertEqual(2, len(self.wr))

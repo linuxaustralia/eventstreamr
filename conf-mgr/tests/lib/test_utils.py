@@ -45,7 +45,7 @@ class AbstractPriorityDictionaryTestCase(unittest.TestCase):
                 self).__init__()
             self.test = test
 
-        def ordered_configs(self):
+        def _ordered_configs(self):
             return self.test.data
 
 
@@ -101,4 +101,4 @@ class PrioritySubDictionaryTestCase(unittest.TestCase):
             return dict_list
         self.all = a
         obj = ut.PrioritySubDictionary(self.parent, "hello")
-        self.assertListEqual(obj.ordered_configs(), dict_list)
+        self.assertListEqual(obj._ordered_configs(), dict_list)

@@ -68,7 +68,7 @@ class AbstractPriorityDictionary(Mapping):
 
         :raises KeyError: When the key cannot be found.
         """
-        cfgs = self.ordered_configs()
+        cfgs = self._ordered_configs()
         for cfg in cfgs:
             if key in cfg:
                 return cfg[key]
@@ -83,7 +83,7 @@ class AbstractPriorityDictionary(Mapping):
             Each key will appear exactly once and in an undefined order.
 
         """
-        cfgs = self.ordered_configs()
+        cfgs = self._ordered_configs()
         keys = set()
         for cfg in cfgs:
             keys.update(cfg.keys())
@@ -111,7 +111,7 @@ class AbstractPriorityDictionary(Mapping):
         """
         Searches the database for :code:`key`.
         """
-        cfgs = self.ordered_configs()
+        cfgs = self._ordered_configs()
         for cfg in cfgs:
             if key in cfg:
                 return True
@@ -127,7 +127,7 @@ class AbstractPriorityDictionary(Mapping):
         If the key is missing then an empty dictionary is returned.
         """
         values = []
-        cfgs = self.ordered_configs()
+        cfgs = self._ordered_configs()
         for cfg in cfgs:
             if key in cfg:
                 values.append(cfg[key])

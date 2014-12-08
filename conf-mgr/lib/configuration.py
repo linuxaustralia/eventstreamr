@@ -87,7 +87,7 @@ class ConfigurationManager(Observable):
         """
         if service_name in self.configs:
             if source_name is not None:
-                if source_name in self.configs:
+                if source_name in self.configs[service_name]:
                     self.configs[service_name].pop(source_name)
                 else:
                     return # Prevent notification if no op performed.
@@ -137,5 +137,5 @@ class ServiceConfigurationWrapper(AbstractPriorityDictionary, Observable):
     def _ordered_configs(self):
         service_config = self.config_manager.configs.get(self.service_name, {})
         return map(lambda v: v["config"],
-                   sorted(self.service_config().values(),
+                   sorted(service_config.values(),
                           reverse=True, key=lambda v: v["priority"]))
