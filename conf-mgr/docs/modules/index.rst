@@ -10,5 +10,4 @@ TODO: Provide a nice description of the API.
     :maxdepth: 6
 
     manager
-    station
     lib/index
