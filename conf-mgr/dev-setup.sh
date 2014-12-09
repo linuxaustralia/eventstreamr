@@ -56,6 +56,7 @@ install twisted
 install sphinx
 install networkx
 install matplotlib
+install sphinx_rtd_theme
 
 # Return to old directory.
 cd $OLDPWD

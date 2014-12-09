@@ -15,6 +15,7 @@ Basic Tutorials
 .. toctree::
     :maxdepth: 10
 
-    running.rst
-    new_role.rst
-    commands.rst
+    running
+    new_role
+    commands
+    executing-programs
