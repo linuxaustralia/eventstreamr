@@ -1,19 +1,19 @@
 #!
 
 """
-This file will contain a lightweight wrapper around C{twisted.python.log} to make certain kinds of
+This file will contain a lightweight wrapper around :code:`twisted.python.log` to make certain kinds of
 logging easier and also allow pre-definition of extra content. This is in preparation for the move
 to transmitting station logs to the manager.
 
 This will provide a class that allows:
- - Debug messages that are only output when the C{PRODUCTION} environment variable is not set.
+ - Debug messages that are only output when the :code:`PRODUCTION` environment variable is not set.
  - Simpler logging of error messages
  - The definition of logging location at creation instead of at every log call.
 
-All of these will simply call onto C{twisted.python.log} as necessary
+All of these will simply call onto :code:`twisted.python.log` as necessary
 
-It will also be a drop in replace for C{from twisted.python import log} by providing a base log
-instance which can be imported as: C{from lib.logging import log} without any code being changed.
+It will also be a drop in replace for :code:`from twisted.python import log` by providing a base log
+instance which can be imported as: :code:`from lib.logging import log` without any code being changed.
 """
 
 from time import strftime, gmtime, time
@@ -85,21 +85,21 @@ class Logger(LogPublisher):
         """
         Write a failure to the log.
 
-        The C{_stuff} and C{_why} parameters use an underscore prefix to lessen
+        The :code:`_stuff` and :code:`_why` parameters use an underscore prefix to lessen
         the chance of colliding with a keyword argument the application wishes
         to pass.  It is intended that they be supplied with arguments passed
         positionally, not by keyword.
 
-        @param _stuff: The failure to log.  If C{_stuff} is C{None} a new
+        @param _stuff: The failure to log.  If :code:`_stuff` is :code:`None` a new
             L{Failure<twisted.python.failure.Failure>} will be created from the current exception
-            state.  If C{_stuff} is an C{Exception} instance it will be wrapped in a
-            C{Failure}.
-        @type _stuff: C{NoneType}, C{Exception}, or L{Failure<twisted.python.failure.Failure>}.
+            state.  If :code:`_stuff` is an :code:`Exception` instance it will be wrapped in a
+            :code:`Failure`.
+        @type _stuff: :code:`NoneType`, :code:`Exception`, or L{Failure<twisted.python.failure.Failure>}.
 
         @param _why: The source of this failure.  This will be logged along with
-            C{_stuff} and should describe the context in which the failure
+            :code:`_stuff` and should describe the context in which the failure
             occurred.
-        @type _why: C{str}
+        @type _why: :code:`str`
         """
         if _stuff is None:
             _stuff = failure.Failure()

@@ -8,7 +8,7 @@ Provides untility functions for accessing information about the computer.
 
 def is_production():
     """
-    Returns a truthy value if this is being run in production. It checks if the C{PRODUCTION}
+    Returns a truthy value if this is being run in production. It checks if the :code:`PRODUCTION`
     environment variable is defined to be a truthy value.
     """
     import os
@@ -17,7 +17,7 @@ def is_production():
 
 def computer_ip():
     """
-    Returns the computer's IP address by calling C{ifdata}. Otherwise simply returning a constant
+    Returns the computer's IP address by calling :code:`ifdata`. Otherwise simply returning a constant
     IP address.
     """
     from subprocess import check_output
@@ -29,7 +29,7 @@ def computer_ip():
 
 def computer_hostname():
     """
-    Returns the computer's name as given by C{hostname}. Otherwise simply returning a constant name.
+    Returns the computer's name as given by :code:`hostname`. Otherwise simply returning a constant name.
     """
     from subprocess import check_output
     try:
@@ -40,7 +40,7 @@ def computer_hostname():
 
 def computer_mac_address():
     """
-    Returns the computer's MAC address by calling C{ifdata}. Otherwise simply returning a constant
+    Returns the computer's MAC address by calling :code:`ifdata`. Otherwise simply returning a constant
     MAC address.
     """
     from subprocess import check_output
