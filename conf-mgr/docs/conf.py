@@ -116,7 +116,7 @@ html_theme = 'default'
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-if on_rtd:
+if not on_rtd:
   import sphinx_rtd_theme
 
   html_theme = "sphinx_rtd_theme"
