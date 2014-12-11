@@ -1,7 +1,10 @@
-:mod:`lib.configuration` --- Configuration
+:mod:`configuration` --- Configuration
 ==========================================
 
-.. module:: lib.configuration
+.. toctree::
+    loader
+
+.. module:: configuration
     :synopsis: Configuration Manager and supporting classes.
 
 

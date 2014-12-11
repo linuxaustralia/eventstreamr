@@ -1,6 +1,6 @@
 import unittest
 
-import lib.configuration as cfg
+import configuration as cfg
 
 class ConfigurationManagerTestCase(unittest.TestCase):
     def setUp(self):
