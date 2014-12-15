@@ -25,7 +25,8 @@ function missing() {
 
 function install() {
     # `pip show` outputs nothing if the package is not installed.
-    if [[ `pip show $1` == "" ]]; then
+    if ! pip freeze | grep -iq "$1"; then
+        echo "Installing $1"
         pip install $1
     fi
 }
@@ -35,28 +36,27 @@ if missing pip; then
     return
 fi
 
-
-if missing virtualenv; then
-    # Virtual environment install.
-    pip install virtualenv
-fi
-
-if [ ! -d "$VENV_DIR" ]; then
-    # Create a new environment.
-    virtualenv -p `which python2.7` $VENV_DIR
-    # And configure it to use python 2.7
-fi
-
 if [[ $VIRUTAL_ENV != $DIR* ]]; then
+    install virtualenv
+
+    if [ ! -d "$VENV_DIR" ]; then
+        # Create a new environment.
+        virtualenv -p `which python2.7` $VENV_DIR
+        # And configure it to use python 2.7
+    fi
+
     # Activate if not already active.
     source $VENV_DIR/bin/activate >/dev/null 2>&1
 fi
 
-install twisted
-install sphinx
-install networkx
-install matplotlib
-install sphinx_rtd_theme
+REQUIREMENT_FILES=("build-requirements.txt" "dev-requirements.txt")
+
+for REQ_FILE in "${REQUIREMENT_FILES[@]}"
+do
+    while read REQ; do
+        install $REQ
+    done < $REQ_FILE
+done
 
 # Return to old directory.
 cd $OLDPWD

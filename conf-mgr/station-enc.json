@@ -1,8 +1,0 @@
-{
-    "manager_address": "10.4.4.201",
-    "manager_port": 5002,
-    "dynamic_config": "station_config.json",
-    "blocked_roles": [
-        "mixer", "cut"
-    ]
-}

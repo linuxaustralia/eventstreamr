@@ -1,5 +1,5 @@
 Conference Manager
-==================
+================== 
 
 [![Documentation Status](https://readthedocs.org/projects/eventstreamr/badge/?version=latest)](https://readthedocs.org/projects/eventstreamr/?badge=latest)
 

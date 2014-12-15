@@ -11,3 +11,5 @@ schedule.json
 _build
 *.pid
 conf-mgr/venv
+*.egg-info
+conf-mgr/build
