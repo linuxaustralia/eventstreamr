@@ -3,8 +3,8 @@ __author__ = 'Lee Symes'
 
 from twisted.protocols import amp
 
-from lib.amp import arguments as amp_args
-from lib.commands import configuration_helper
+from eventstreamr2.lib.amp import arguments as amp_args
+from eventstreamr2.lib.commands import configuration_helper
 
 
 # TODO rename this stuff.

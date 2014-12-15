@@ -13,7 +13,7 @@ This will provide a class that allows:
 All of these will simply call onto :code:`twisted.python.log` as necessary
 
 It will also be a drop in replace for :code:`from twisted.python import log` by providing a base log
-instance which can be imported as: :code:`from lib.logging import log` without any code being changed.
+instance which can be imported as: :code:`from eventstreamr2.lib.logging import log` without any code being changed.
 """
 
 from time import strftime, gmtime, time
@@ -31,10 +31,10 @@ from twisted.python import failure
 from twisted.python.log import LogPublisher, textFromEventDict
 from twisted.python.logfile import LogFile
 
-from lib.computer_info import is_production
-from lib.commands import configuration_helper
-import lib.amp.arguments as amp
-from lib.file_helper import list_filtered_files_in, exists, join, read_in, delete
+from eventstreamr2.lib.computer_info import is_production
+from eventstreamr2.lib.commands import configuration_helper
+import eventstreamr2.lib.amp.arguments as amp
+from eventstreamr2.lib.file_helper import list_filtered_files_in, exists, join, read_in, delete
 _logging_commands = configuration_helper("Station Logging")
 
 @_logging_commands.command

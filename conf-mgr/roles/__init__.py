@@ -5,7 +5,7 @@ This file defines the storage for the roles.
 
 """
 import pkgutil as _pkgutil
-from lib.logging import getLogger
+from eventstreamr2.lib.logging import getLogger
 
 
 _log = getLogger(["roles", "__init__"])

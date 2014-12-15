@@ -15,7 +15,7 @@ class InternalServiceMixin(object):
             ...
 
     :ivar _config_mgr: A configuration manager instance which contains all the configurations.
-    :type _config_mgr: :class:`ConfigurationManager <lib.configuration.ConfigurationManager>`
+    :type _config_mgr: :class:`ConfigurationManager <configuration.ConfigurationManager>`
     :ivar _reactor: A twisted reactor instance to be used for this service. Use this over importing
                     :code:`twisted.internet.reactor` as it allows for easier testing.
     """
@@ -70,7 +70,7 @@ class CommandRegistrationServiceMixin(object):
         Simply provide the configuration helper and then a list
 
         :param helper: The configuration helper the commands provided are attached to.
-        :type helper: lib.commands.ConfigurationHelper
+        :type helper: eventstreamr2.lib.commands.ConfigurationHelper
         :param command_responder_pairs: A list of 2-tuples mapping a command to a function.
         :type command_responder_pairs: list(tuple(Command, function))
         """

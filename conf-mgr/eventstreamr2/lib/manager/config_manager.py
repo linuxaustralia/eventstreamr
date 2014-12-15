@@ -1,6 +1,6 @@
 __author__ = 'Lee Symes'
 
-from lib.file_helper import join, exists, isfile, load_json, save_json
+from eventstreamr2.lib.file_helper import join, exists, isfile, load_json, save_json
 
 
 class StationConfigManager(object):
@@ -86,7 +86,7 @@ class StationConfigManager(object):
         :return:
         :rtype:
         """
-        #TODO Move this out to be a static method(maybe in lib.config instead)
+        #TODO Move this out to be a static method(maybe in eventstreamr2.lib.config instead)
         import time
         ts = long(time.time() * 1000)
         for r in config.itervalues():

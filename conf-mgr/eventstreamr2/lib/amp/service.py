@@ -2,7 +2,7 @@
 Common sub-services such as executing a program every n seconds.
 """
 
-from lib.amp.mixins import InternalServiceMixin
+from eventstreamr2.lib.amp.mixins import InternalServiceMixin
 from twisted.application.service import Service
 from twisted.internet.defer import Deferred
 from twisted.internet import protocol
@@ -123,10 +123,10 @@ class ProgramExecutionService(InternalServiceMixin, Service):
 
         protocol = _InternalProcessProtocol(_run_process, self.protocol())
         if self.delay > 0:
-            self.reactor.callLater(_spawn_process, self.delay, protocol)
+            self._reactor.callLater(_spawn_process, self.delay, protocol)
         else:
             _spawn_process(protocol)
 
 
     def _spawn_process(self, protocol):
-        self.process = self.reactor.spawnProcess(protocol, self.command[0], self.command);
+        self.process = self._reactor.spawnProcess(protocol, self.command[0], self.command);

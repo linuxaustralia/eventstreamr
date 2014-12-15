@@ -5,13 +5,13 @@
 # from twisted.application.service import Service
 # from twisted.internet import protocol, reactor
 #
-# from lib.amp.mixins import CommandRegistrationServiceMixin
-from lib.amp import arguments as amp
-from lib.commands import configuration_helper
-# from lib.file_helper import object_to_json_string
+# from eventstreamr2.lib.amp.mixins import CommandRegistrationServiceMixin
+from eventstreamr2.lib.amp import arguments as amp
+from eventstreamr2.lib.commands import configuration_helper
+# from eventstreamr2.lib.file_helper import object_to_json_string
 # from roles import RoleFactory, Role, register_factory
-# from lib.computer_info import load_averages, num_cores
-# from lib.logging import getLogger
+# from eventstreamr2.lib.computer_info import load_averages, num_cores
+# from eventstreamr2.lib.logging import getLogger
 #
 _cut_job_station = configuration_helper("cut jobs(On Station)")
 cut_job_manager = configuration_helper("cut jobs(On Manager)")

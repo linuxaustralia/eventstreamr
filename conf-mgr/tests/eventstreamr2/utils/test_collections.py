@@ -1,39 +1,87 @@
 import unittest
 
-import lib.utils as ut
+import eventstreamr2.utils.collections as ut
 
 
-class ObservableTestCase(unittest.TestCase):
+
+class WeakFunctionCollectionTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.obj = ut.Observable()
+        self.l = ut.WeakFunctionCollection()
 
-    def test_fires_added(self):
-        called = []
-        def callee():
-            called.append("")
-        self.obj.add_observer(callee)
-        self.obj._notify_observers()
-        self.assertTrue(called)
+    def test_bound_method_works(self):
+        self.assertEqual([], list(self.l))
 
-    def test_fires_with_args(self):
         called = []
-        def callee(arg1):
-            self.assertEqual(self, arg1)
-            called.append("")
-        self.obj.add_observer(callee)
-        self.obj._notify_observers(self)
-        self.assertTrue(called)
 
-    def test_remove_acts_correctly(self):
-        called = []
-        def callee():
-            called.append("")
-        self.obj.add_observer(callee)
-        self.obj.add_observer(callee)
-        self.obj.remove_observer(callee)
-        self.obj._notify_observers()
-        self.assertEqual(1, len(called))
+        class X:
+            def y(self, arg):
+                called.append(arg)
+
+        x = X()
+
+        self.l.append(x.y)
+
+        for fn in self.l:
+            fn("arg")
+            self.assertEqual(["arg"], called)
+            del fn # fn holds the reference; so delete it.
+
+        del x
+
+        self.assertEqual([], list(self.l))
+
+
+
+
+
+class WeakListTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.l = ut.WeakCollection()
+
+
+    def test_init(self):
+        self.assertFalse(self.l)
+        self.assertEqual(len(self.l), 0)
+        l = ut.WeakCollection([self.l])
+        self.assertEqual(len(l), 1)
+        self.assertEqual(list(l), [self.l])
+
+
+    def test_append_remove(self):
+        def m1():
+            pass
+        def m2():
+            pass
+        def m3():
+            pass
+
+        self.assertEqual(len(self.l), 0)
+
+        self.l.append(m1, m2)
+        self.assertEqual(len(self.l), 2)
+
+        self.l.append(m2, m2) # dupes
+        self.assertEqual(len(self.l), 4)
+
+        # No error on missing
+        self.l.remove(m3)
+        self.l.removeAll(m3)
+        self.assertEqual(len(self.l), 4)
+
+        self.l.remove(m2)
+        self.assertEqual(len(self.l), 3)
+
+        # No error on missing
+        self.l.removeAll(m2)
+        self.assertEqual(len(self.l), 1)
+
+        del m1
+
+        # It's still weak
+        self.assertEqual(len(self.l), 0)
+
 
 
 class AbstractPriorityDictionaryTestCase(unittest.TestCase):

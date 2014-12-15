@@ -23,7 +23,7 @@ from time import strftime, gmtime
 from twisted.application.service import Service
 from twisted.python.logfile import LogFile
 
-from lib.logging import SendLogsCommand, _logging_commands, build_file
+from eventstreamr2.lib.logging import SendLogsCommand, _logging_commands, build_file
 
 
 class StationLogReceiver(Service):
@@ -37,7 +37,7 @@ class StationLogReceiver(Service):
         _logging_commands.responder(SendLogsCommand, self.receive_logs)
         _logging_commands.register()
         Service.startService(self)
-        
+
     def stopService(self):
         _logging_commands.remove_responder(SendLogsCommand, self.receive_logs)
 
@@ -61,6 +61,3 @@ class StationLogReceiver(Service):
             log_file.flush()
             log_file.close()
         return {"accepted": True}
-
-
-

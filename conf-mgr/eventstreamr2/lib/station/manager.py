@@ -3,8 +3,8 @@ __author__ = 'lee'
 from twisted.application.service import MultiService
 from twisted.internet.defer import DeferredList, maybeDeferred
 
-from lib.exceptions import InvalidConfigurationException, BlockedRoleException, MissingRoleFactoryException
-from lib.logging import getLogger
+from eventstreamr2.lib.exceptions import InvalidConfigurationException, BlockedRoleException, MissingRoleFactoryException
+from eventstreamr2.lib.logging import getLogger
 # from roles import get_factory, get_factory_names
 
 log = getLogger(["lib", "station", "manager"])

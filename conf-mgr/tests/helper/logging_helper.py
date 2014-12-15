@@ -1,5 +1,5 @@
 import unittest
-import lib.logging as _log
+import eventstreamr2.lib.logging as _log
 
 class _TmpObserver(_log.LogObserver):
 

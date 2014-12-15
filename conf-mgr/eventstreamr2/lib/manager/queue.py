@@ -8,9 +8,9 @@ from uuid import uuid1
 from twisted.application.internet import TimerService
 from twisted.internet.defer import inlineCallbacks
 
-from lib.logging import getLogger
-from lib import file_helper as files
-from lib.manager import get_queue_directories
+from eventstreamr2.lib.logging import getLogger
+from eventstreamr2.lib import file_helper as files
+from eventstreamr2.lib.manager import get_queue_directories
 from roles import encode, cut
 
 __current_directories = []

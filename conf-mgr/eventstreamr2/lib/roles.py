@@ -4,7 +4,7 @@ Role-specific classes and methods.
 
 from twisted.application.service import MultiService
 
-from lib.amp.mixins import InternalServiceMixin
+from eventstreamr2.lib.amp.mixins import InternalServiceMixin
 
 
 class Role(MultiService, InternalServiceMixin, object):

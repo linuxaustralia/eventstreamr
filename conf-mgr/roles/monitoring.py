@@ -1,8 +1,8 @@
 # __author__ = 'Kimberley Manning'
 #
-# from lib.amp.mixins import PollingCommandServiceMixin
+# from eventstreamr2.lib.amp.mixins import PollingCommandServiceMixin
 # from roles import RoleFactory, Role, register_factory
-# from lib.logging import getLogger
+# from eventstreamr2.lib.logging import getLogger
 #
 # class MonitoringRole(PollingCommandServiceMixin, Role):
 #
