@@ -4,6 +4,6 @@ python:
   - "3.4"
 
 # command to install dependencies
-install: "pip install -r build-requirements.txt && pip upgrade setuptools"
+install: "pip install -r build-requirements.txt"
 
 script: "python setup.py build test"
