@@ -1,2 +1,15 @@
 *.pyc
 encoding/test
+conf-mgr/logs-temp
+conf-mgr/logs
+conf-mgr/station-logs
+conf-mgr/station.json
+conf-mgr/station_config.json
+conf-mgr/manager.json
+conf-mgr/apidocs
+schedule.json
+_build
+*.pid
+conf-mgr/venv
+*.egg-info
+conf-mgr/build
