@@ -1,5 +1,11 @@
 #! /bin/bash
 
+PYTHON_VERSION=2.7
+if [[ "X$1" != "X" ]]; then
+  PYTHON_VERSION=$1
+fi  
+
+
 OLDPWD=$(pwd)
 
 SOURCE=${BASH_SOURCE[0]}
@@ -41,7 +47,7 @@ if [[ $VIRUTAL_ENV != $DIR* ]]; then
 
     if [ ! -d "$VENV_DIR" ]; then
         # Create a new environment.
-        virtualenv -p `which python2.7` $VENV_DIR
+        virtualenv -p `which python$PYTHON_VERSION` $VENV_DIR
         # And configure it to use python 2.7
     fi
 
