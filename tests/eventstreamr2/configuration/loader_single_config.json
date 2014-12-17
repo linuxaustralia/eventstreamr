@@ -1,0 +1,12 @@
+{
+    "service1": {
+        "complex": {
+            "key1": "value",
+            "key2": "value"
+        }
+    },
+    "service2": {
+        "Monty": "Python",
+        "Series": ["Monty Python", "Scooby Doo"]
+    }
+}

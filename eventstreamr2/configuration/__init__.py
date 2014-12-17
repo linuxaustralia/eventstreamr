@@ -1,5 +1,6 @@
 from eventstreamr2.utils.events import Observable
 from eventstreamr2.utils.collections import AbstractPriorityDictionary
+import itertools
 
 
 
@@ -65,7 +66,7 @@ class ConfigurationManager(Observable):
         self._configs.setdefault(source_name, {}) # Setup source name dictionary
         self._configs[source_name][self._priority_key] = new_source_priority
 
-    def set_config(self, service_name, source_name, source_priority, new_config):
+    def set_config(self, service_name, source_name, source_priority, new_config=None):
         """
         Assigns the given configuration to the service's configuration.
 
@@ -73,13 +74,21 @@ class ConfigurationManager(Observable):
         overwritten with the values given. The source name can be reused over multiple service
         names without any ill effects.
 
+        If ``new_config`` is missing; it is assumed that no priority is provided.
+
         :param service_name: The name of the service.
         :param source_name: The name of the source.
         :param source_priority: The priority of the source.
+        :type source_priority: number or dict
         :param new_config: A mapping containing the configuration.
+        :type source_priority: dict or None
         """
+        if new_config is None:
+            source_priority, new_config = new_config, source_priority
+
         self._configs.setdefault(source_name, {}) # Setup source name dictionary
-        self._configs[source_name][self._priority_key] = source_priority
+        if source_priority is not None:
+            self._configs[source_name][self._priority_key] = source_priority
         self._configs[source_name][service_name] = new_config
         self._notify_observers(service_name)
 
@@ -107,8 +116,9 @@ class ConfigurationManager(Observable):
         """
         if source_name is not None:
             if source_name in self._configs:
-                self._configs[source_name].pop(service_name)
-                self._notify_observers(service_name)
+                if service_name in self._configs[source_name]:
+                    self._configs[source_name].pop(service_name)
+                    self._notify_observers(service_name)
         else:
             modified = False
             for source_cfg in self._configs.values():
@@ -159,10 +169,13 @@ class ServiceConfigurationWrapper(AbstractPriorityDictionary, Observable):
 
 
     def _ordered_configs(self):
+        pk = ConfigurationManager._priority_key
         name = self.service_name
-        src_cfgs = sorted(self.config_manager._configs.values(),
+        # Only those with
+        filtered_cfgs = filter(lambda val: pk in val, self.config_manager._configs.values())
+        src_cfgs = sorted(filtered_cfgs,
                         reverse=True,
-                        key=lambda v: v[ConfigurationManager._priority_key])
+                        key=lambda v: v[pk])
 
         for src_cfg in src_cfgs:
             if self.service_name in src_cfg:
