@@ -12,3 +12,4 @@ TODO: Provide a nice description of the API.
     manager
     configuration/index
     lib/index
+    utils/index

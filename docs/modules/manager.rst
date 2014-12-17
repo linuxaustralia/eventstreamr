@@ -1,7 +1,7 @@
-:mod:`manager` --- Entrypoint for the :term:`Manager`
-=====================================================
+:mod:`eventstreamr2.manager` --- Entrypoint for the :term:`Manager`
+===================================================================
 
-.. module:: manager
+.. module:: eventstreamr2.manager
     :synopsis: The entrypoint for running the manager.
 
 This module is used when running :program:`twistd`; the program accesses this modules :data:`application` variable; using the :twisted:`application.service.Application` as the root service. All other servies are added as children services to this.

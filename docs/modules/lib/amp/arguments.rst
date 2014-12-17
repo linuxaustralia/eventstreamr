@@ -1,7 +1,7 @@
-:mod:`lib.amp.arguments` --- Additional argument types
+:mod:`eventstreamr2.lib.amp.arguments` --- Additional argument types
 ======================================================
 
-.. module:: lib.amp.arguments
+.. module:: eventstreamr2.lib.amp.arguments
     :synopsis: AMP Argument types.
 
 The arguments defined here can be used to create new commands. To find out more see :ref:`commands-defining`.

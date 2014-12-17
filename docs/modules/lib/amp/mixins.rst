@@ -1,7 +1,7 @@
-:mod:`lib.amp.mixins` --- Service Mixins
-========================================
+:mod:`eventstreamr2.lib.amp.mixins` --- Service Mixins
+======================================================
 
-.. module:: lib.amp.mixins
+.. module:: eventstreamr2.lib.amp.mixins
     :synopsis: AMP Argument types.
 
 This module provides some basic mixins. All the mixin classes are :term:`new-style classes <new-style class>` which means that they support and rely on the correct calls to :func:`super`.

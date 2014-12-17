@@ -1,5 +1,5 @@
-:mod:`lib` --- Framework base package
-*************************************
+:mod:`eventstreamr2.lib` --- Framework base package
+***************************************************
 
 Contents:
 
@@ -8,4 +8,3 @@ Contents:
     :numbered:
 
     amp/index
-    utils

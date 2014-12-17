@@ -1,19 +1,33 @@
-:mod:`lib.utils` --- Utility classes
-####################################
+:mod:`eventstreamr2.utils` --- Utilities
+########################################
 
 .. contents::
 
 
 .. module:: eventstreamr2.utils
-    :synopsis: General utility classes
+    :synopsis: Utility classes.
 
-Collections
-===========
+:mod:`eventstreamr2.utils.collections`
+======================================
+
+.. module:: eventstreamr2.utils.collections
+    :synopsis: Collections including a weak list that supports bound functions.
+
+Concrete Classes
+----------------
+
+.. autoclass:: PrioritySubDictionary
+
+
+.. autoclass:: WeakCollection
+    :members:
+
+.. autoclass:: WeakFunctionCollection
+    :members:
+
 
 Abstract Classes
 ----------------
-
-.. currentmodule:: eventstreamr2.utils
 
 .. autoclass:: AbstractPriorityDictionary
 
@@ -43,23 +57,12 @@ Abstract Classes
 
     .. automethod:: __contains__
 
-Concrete Classes
-----------------
-
-.. currentmodule:: eventstreamr2.utils
-
-.. autoclass:: PrioritySubDictionary
-
-.. autoclass:: PrioritySubDictionary
 
 
+:mod:`eventstreamr2.utils.events`
+=================================
 
-
-
-Others
-======
-
-.. currentmodule:: eventstreamr2.utils
+.. currentmodule:: eventstreamr2.utils.events
 
 .. autoclass:: Observable
 

@@ -1,10 +1,10 @@
-:mod:`configuration`
-====================
+:mod:`eventstreamr2.configuration`
+==================================
 
 .. toctree::
     loader
 
-.. module:: configuration
+.. module:: eventstreamr2.configuration
     :synopsis: Configuration Manager and supporting classes.
 
 

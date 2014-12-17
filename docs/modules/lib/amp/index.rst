@@ -1,8 +1,8 @@
 
-:mod:`lib.amp` --- An extension of Twisted's AMP Implementaion
+:mod:`eventstreamr2.lib.amp` --- An extension of Twisted's AMP Implementaion
 **************************************************************
 
-.. module:: lib.amp
+.. module:: eventstreamr2.lib.amp
 
 This package provides extensions for Twisted's AMP API. These include more flexible arguments and
 an API to dynamically enable and disable commands.
