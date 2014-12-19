@@ -1,0 +1,19 @@
+{
+    "station": {
+        "_priority": 100,
+        "web": {
+            "key": "value"
+        },
+        "loader": {
+            "file": "somewhere.json"
+        }
+    },
+    "manager": {
+        "web": {
+            "key": "value1"
+        },
+        "loader": {
+            "file": "somewhere-else.json"
+        }
+    }
+}
