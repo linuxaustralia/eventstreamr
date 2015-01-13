@@ -9,9 +9,7 @@ install:
   - pip install -q coveralls
   - pip install -r build-requirements.txt -r test-requirements.txt
 
-script:
-  - setup.py build
-  - coverage run --source=eventstreamr2 setup.py test flake8
+script: ./.travis-ci.sh
 
 after_script:
   - coveralls
