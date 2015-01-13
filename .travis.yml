@@ -7,7 +7,7 @@ python:
 # command to install dependencies
 install:
   - pip install -q coveralls
-  - pip install -r build-requirements.txt -r test-requirements.txt
+  - pip install -q -r build-requirements.txt -r test-requirements.txt
 
 script: ./.travis-ci.sh
 
