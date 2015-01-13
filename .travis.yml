@@ -5,6 +5,13 @@ python:
 # - "3.4"
 
 # command to install dependencies
-install: "pip install -r build-requirements.txt"
+install:
+  - pip install -q coveralls
+  - pip install -r build-requirements.txt -r test-requirements.txt
 
-script: "python setup.py build test"
+script:
+  - setup.py build
+  - coverage run --source=eventstreamr2 setup.py test flake8
+
+after_script:
+  - coveralls

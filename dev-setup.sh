@@ -3,7 +3,7 @@
 PYTHON_VERSION=2.7
 if [[ "X$1" != "X" ]]; then
   PYTHON_VERSION=$1
-fi  
+fi
 
 
 OLDPWD=$(pwd)
@@ -29,21 +29,13 @@ function missing() {
     fi
 }
 
-function install() {
-    # `pip show` outputs nothing if the package is not installed.
-    if ! pip freeze | grep -iq "$1"; then
-        echo "Installing $1"
-        pip install $1
-    fi
-}
-
 if missing pip; then
     echo "Please install pip before running this."
     return
 fi
 
 if [[ $VIRUTAL_ENV != $DIR* ]]; then
-    install virtualenv
+    pip install virtualenv
 
     if [ ! -d "$VENV_DIR" ]; then
         # Create a new environment.
@@ -53,6 +45,7 @@ if [[ $VIRUTAL_ENV != $DIR* ]]; then
 
     # Activate if not already active.
     source $VENV_DIR/bin/activate >/dev/null 2>&1
+    pip install --upgrade pip
 fi
 
 REQUIREMENT_FILES=("build-requirements.txt" "dev-requirements.txt")
