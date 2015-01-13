@@ -2,8 +2,10 @@ Conference Manager
 ================== 
 
 [![Documentation Status](https://readthedocs.org/projects/eventstreamr/badge/?version=latest)](https://readthedocs.org/projects/eventstreamr/?badge=latest)
+[![Coverage Status](https://coveralls.io/repos/leesdolphin/eventstreamr/badge.png?branch=master)](https://coveralls.io/r/leesdolphin/eventstreamr?branch=master)
+[![Build Status](https://travis-ci.org/leesdolphin/eventstreamr.svg?branch=master)](https://travis-ci.org/leesdolphin/eventstreamr)
 
-This project aims to reimplement the EventStreamr in Python.
+This project aims to provide a distributed encoding system for PyConAU 2015 and beyond
 
 This project currently has the following dependencies:
 
