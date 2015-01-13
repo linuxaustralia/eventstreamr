@@ -2,5 +2,5 @@
 
 set -ev
 
-setup.py build
+python setup.py build
 coverage run --source=eventstreamr2 setup.py test flake8
