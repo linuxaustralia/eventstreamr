@@ -20,3 +20,10 @@ Production Changes
 ------------------
 
  - Change `lib.computer_info` to get the real IP and MAC address.
+
+
+To Investigate
+--------------
+
+ - Migrate to using Docker containers.
+ - Look at the [Python API](http://docker-py.readthedocs.org/en/latest/) for Docker
