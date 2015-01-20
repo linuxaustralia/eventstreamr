@@ -27,3 +27,4 @@ To Investigate
 
  - Migrate to using Docker containers.
  - Look at the [Python API](http://docker-py.readthedocs.org/en/latest/) for Docker
+ - Using Avahi for service discovery.
